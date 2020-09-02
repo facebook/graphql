@@ -607,7 +607,7 @@ can be used in the context of querying a `User`.
 Fragments cannot be specified on any input value (scalar, enumeration, or input
 object).
 
-Fragments can be specified on object types, interfaces, and unions.
+Fragments can be specified on object types, interfaces, unions, and tagged types.
 
 Selections within fragments only return values when the concrete type of the object
 it is operating on matches the type of the fragment.

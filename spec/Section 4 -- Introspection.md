@@ -90,8 +90,9 @@ warnings.
 ## Type Name Introspection
 
 GraphQL supports type name introspection at any point within a query by the
-meta-field `__typename: String!` when querying against any Object, Interface,
-or Union. It returns the name of the object type currently being queried.
+meta-field __typename: String! when querying against any Object, Interface,
+Union or Tagged types. It returns the name of the concrete type currently being
+queried, which will be an Object or Tagged type.
 
 This is most often used when querying against Interface or Union types to
 identify which actual type of the possible types has been returned.
@@ -139,6 +140,9 @@ type __Type {
   # should be non-null for INTERFACE and UNION only, always null for the others
   possibleTypes: [__Type!]
 
+  # should be non-null for TAGGED only, must be null for the others
+  memberFields(includeDeprecated: Boolean = false): [__TaggedMemberField!]
+
   # should be non-null for ENUM only, must be null for the others
   enumValues(includeDeprecated: Boolean = false): [__EnumValue!]
 
@@ -165,6 +169,14 @@ type __InputValue {
   defaultValue: String
 }
 
+type __TaggedMemberField {
+  name: String!
+  description: String
+  type: __Type!
+  isDeprecated: Boolean!
+  deprecationReason: String
+}
+
 type __EnumValue {
   name: String!
   description: String
@@ -177,6 +189,7 @@ enum __TypeKind {
   OBJECT
   INTERFACE
   UNION
+  TAGGED
   ENUM
   INPUT_OBJECT
   LIST
@@ -206,6 +219,8 @@ enum __DirectiveLocation {
   ARGUMENT_DEFINITION
   INTERFACE
   UNION
+  TAGGED
+  TAGGED_MEMBER_FIELD_DEFINITION
   ENUM
   ENUM_VALUE
   INPUT_OBJECT
@@ -216,8 +231,8 @@ enum __DirectiveLocation {
 
 ### The __Type Type
 
-`__Type` is at the core of the type introspection system.
-It represents scalars, interfaces, object types, unions, enums, input objects types in the system.
+`__Type` is at the core of the type introspection system. It represents all
+named types in the system.
 
 `__Type` also represents type modifiers, which are used to modify a type
 that it refers to (`ofType: __Type`). This is how we represent lists,
@@ -296,6 +311,25 @@ Fields
 * `interfaces`: The set of interfaces that this interface implements.
 * `possibleTypes` returns the list of types that implement this interface.
   They must be object types.
+* All other fields must return {null}.
+
+
+#### Tagged
+
+Tagged types are an type where exactly one member out of a list of potential
+members must be present. The possible members of a tagged type are modeled as
+fields - a name and associated type - and are explicitly listed out in
+`memberFields`.  No modification of a type is necessary to use it as the member
+field type of a tagged type.
+
+Fields
+
+* `kind` must return `__TypeKind.TAGGED`.
+* `name` must return a String.
+* `description` may return a String or {null}.
+* `memberFields`: The set of member fields query-able on this type.
+  * Accepts the argument `includeDeprecated` which defaults to {false}. If
+    {true}, deprecated member fields are also returned.
 * All other fields must return {null}.
 
 
@@ -395,6 +429,20 @@ Fields
 * `defaultValue` may return a String encoding (using the GraphQL language) of the
   default value used by this input value in the condition a value is not
   provided at runtime. If this input value has no default value, returns {null}.
+
+### The __TaggedMemberField Type
+
+The `__TaggedMemberField` type represents `memberFields` of a tagged type.
+
+Fields
+
+* `name` must return a String
+* `description` may return a String or {null}
+* `type` must return a `__Type` that represents the type this member field expects.
+* `isDeprecated` returns {true} if this member field should no longer be used,
+  otherwise {false}.
+* `deprecationReason` optionally provides a reason why this member field is deprecated.
+
 
 ### The __EnumValue Type
 

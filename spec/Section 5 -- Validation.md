@@ -81,6 +81,19 @@ type Cat implements Pet {
 union CatOrDog = Cat | Dog
 union DogOrHuman = Dog | Human
 union HumanOrAlien = Human | Alien
+
+tagged Being {
+  cat: Cat
+  dog: Dog
+  human: Human
+  alien: Alien
+}
+
+tagged Earthling {
+  cat: Cat
+  dog: Dog
+  human: Human
+}
 ```
 
 
@@ -324,7 +337,12 @@ must provide the operation name as described in {GetOperation()}.
 
 ## Fields
 
-### Field Selections on Objects, Interfaces, and Unions Types
+### Field Selections
+
+Field selections must exist on Object, Interface, Union and Tagged types.
+
+Note: Tagged types define member fields which are queried with field
+selections.
 
 **Formal Specification**
 
@@ -396,7 +414,6 @@ fragment directFieldSelectionOnUnion on CatOrDog {
   barkVolume
 }
 ```
-
 
 ### Field Selection Merging
 
@@ -568,7 +585,7 @@ fragment conflictingDifferingResponses on Pet {
 * Let {selectionType} be the result type of {selection}
 * If {selectionType} is a scalar or enum:
   * The subselection set of that selection must be empty
-* If {selectionType} is an interface, union, or object
+* If {selectionType} is an interface, union, object or tagged type
   * The subselection set of that selection must NOT BE empty
 
 **Explanatory Text**
@@ -594,9 +611,9 @@ fragment scalarSelectionsNotAllowedOnInt on Dog {
 }
 ```
 
-Conversely the leaf field selections of GraphQL queries
-must be of type scalar or enum. Leaf selections on objects, interfaces,
-and unions without subfields are disallowed.
+Conversely the leaf field selections of GraphQL queries must be of type scalar
+or enum. Leaf selections on objects, interfaces, unions and tagged types
+without subfields are disallowed.
 
 Let's assume the following additions to the query root type of the schema:
 
@@ -605,6 +622,7 @@ extend type Query {
   human: Human
   pet: Pet
   catOrDog: CatOrDog
+  being: Being
 }
 ```
 
@@ -621,6 +639,10 @@ query directQueryOnInterfaceWithoutSubFields {
 
 query directQueryOnUnionWithoutSubFields {
   catOrDog
+}
+
+query directQueryOnTaggedWithoutSubFields {
+  being
 }
 ```
 
@@ -895,14 +917,14 @@ fragment inlineNotExistingType on Dog {
 **Formal Specification**
 
 * For each {fragment} defined in the document.
-* The target type of fragment must have kind {UNION}, {INTERFACE}, or
-  {OBJECT}.
+* The target type of fragment must have kind {UNION}, {INTERFACE}, 
+  {OBJECT} or {TAGGED}.
 
 **Explanatory Text**
 
-Fragments can only be declared on unions, interfaces, and objects. They are
-invalid on scalars. They can only be applied on non-leaf fields. This rule
-applies to both inline and named fragments.
+Fragments can only be declared on unions, interfaces, objects and tagged types.
+They are invalid on scalars. They can only be applied on non-leaf fields. This
+rule applies to both inline and named fragments.
 
 The following fragment declarations are valid:
 
@@ -917,6 +939,12 @@ fragment fragOnInterface on Pet {
 
 fragment fragOnUnion on CatOrDog {
   ... on Dog {
+    name
+  }
+}
+
+fragment fragOnTagged on Being {
+  dog {
     name
   }
 }
@@ -1094,7 +1122,7 @@ fragment ownerFragment on Human {
 
 GetPossibleTypes(type):
 
-  * If {type} is an object type, return a set containing {type}
+  * If {type} is an object type or tagged type, return a set containing {type}
   * If {type} is an interface type, return the set of types implementing {type}
   * If {type} is a union type, return the set of possible types of {type}
 
@@ -1132,6 +1160,43 @@ fragment catInDogFragmentInvalid on Dog {
   }
 }
 ```
+
+
+##### Tagged Spreads In Tagged Scope
+
+In the scope of a tagged type, the only valid tagged type
+fragment spread is one that applies to the same type that
+is in scope.
+
+For example
+
+```graphql example
+fragment beingFragment on Being {
+  ... on Being {
+    dog {
+      barkVolume
+    }
+  }
+}
+```
+
+and the following is invalid
+
+```graphql counter-example
+fragment beingFragment on Being {
+  ... on Earthling {
+    dog {
+      barkVolume
+    }
+  }
+}
+```
+
+This counter-example may be surprising since Being is covariant to Earthling
+(Being contains all the member fields Earthling contains), however allowing
+this spread to be valid would inhibit schema evolution - we'd have to ensure
+that Being always remained covariant to Earthling, preventing us from adding
+member fields to Earthling alone without adding them to Being.
 
 
 ##### Abstract Spreads in Object Scope
@@ -1572,7 +1637,7 @@ fragment HouseTrainedFragment on Query {
 **Explanatory Text**
 
 Variables can only be input types. Objects, unions, and interfaces cannot be
-used as inputs.
+used as inputs, neither can non-input tagged types.
 
 For these examples, consider the following typesystem additions:
 
