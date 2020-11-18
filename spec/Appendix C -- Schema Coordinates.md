@@ -5,17 +5,20 @@ Schema Coordinates are human readable strings that uniquely identify an element 
 ## Definition 
 
 SchemaCoordinates :
-  - TypeName FieldSpecifier?
-  - InterfaceName FieldSpecifier?
+  - TypeDefinitionName FieldSpecifier?
   - EnumName EnumValueSpecifier?
   - @ DirectiveName ArgumentSpecifier?
   - UnionName
+
+TypeDefinitionName:
+  - ObjectTypeName
+  - InterfaceTypeName
 
 FieldSpecifier :
   - . FieldName ArgumentSpecifier?
 
 ArgumentSpecifier :
-  - ( ArgumentName )
+  - ( ArgumentName: )
 
 EnumValueSpecifier :
   - . EnumValue
@@ -61,108 +64,30 @@ type Query {
 }
 ```
 
-**Selecting a Type**
+The following table demonstrates how to select various kinds of schema elements:
 
-Schema Coordinates for the `Business` type:
+|  Example                       | Description                                                         |
+| ------------------------------ | ------------------------------------------------------------------- |
+| `Business`                     | `Business` type                                                     |
+| `User`                         | `User` type                                                         |
+| `Business.name`                | `name` field on the `Business` type                                 |
+| `User.name`                    | `name` field on the `User` type                                     |
+| `Query.searchBusiness(name:)`  | `name` argument on the `searchBusiness` field on the `Query` type   |
+| `Query.searchBusiness(filter:)`| `filter` argument on the `searchBusiness` field on the `Query` type |
+| `SearchFilter`                 | `SearchFilter` enum                                                 |
+| `SearchFilter.OPEN_NOW`        | `OPEN_NOW` value of the`SearchFilter` enum                          |
+| `@private`                     | `@private` directive definition                                     |
+| `@private(scope:)`             | `scope` argument on the `@private` directive definition             |
+| `Address`                      | `Address` interface                                                 |
+| `Address.city`                 | `city` field on the `Address` interface                             |
+| `Entity`                       | `Entity` union definition                                           |
 
-```example
-Business
-```
+Note: You may not select members inside a union definition.
 
-Schema Coordinates for the `User` type:
-
-```example
-User
-```
-
-**Selecting a Field on a Type**
-
-Schema Coordinates for the `name` field on the `Business` type:
-
-```example
-Business.name
-```
-
-Schema Coordinates for the `name` field on the `User` type:
-
-```example
-User.name
-```
-
-**Selecting an Argument on a Field**
-
-Schema Coordinates for the `name` argument on the `searchBusiness` field on the `Query` type:
-
-```example
-Query.searchBusiness(name)
-```
-
-Schema Coordinates for the `filter` argument on the `searchBusiness` field on the `Query` type:
-
-```example
-Query.searchBusiness(filter)
-```
-
-**Selecting an Enum**
-
-Schema Coordinates for the `SearchFilter` enum:
-
-```example
-SearchFilter
-```
-
-**Selecting an Enum Value**
-
-Schema Coordinates for the `OPEN_NOW` value of the`SearchFilter` enum:
-
-```example
-SearchFilter.OPEN_NOW
-```
-
-**Selecting a Directive Definition**
-
-Schema Coordinates for the `@private` directive definition:
-
-```example
-@private
-```
-
-**Selecting a Directive Definition Argument**
-
-Schema Coordinates for the `scope` argument on the `@private` directive definition:
-
-```example
-@private(scope)
-```
-
-**Selecting an Interface**
-
-Schema Coordinates for the `Address` interface:
-
-```example
-Address
-```
-
-**Selecting a Field on an Interface**
-
-Schema Coordinates for the `city` field on the `Address` interface:
-
-```example
-Address.city
-```
-
-**Selecting a Union**
-
-Schema Coordinates for the `Entity` union definition:
-
-```example
-Entity
-```
-
-You may not select members inside a union definition.
+The following counter example are *not* considered valid Schema Coordinates:
 
 ```graphql counter-example
 Entity.Business
 ```
 
-In such cases, you may wish to [select the type directly](#sec-Examples.Selecting-a-Type) instead.
+In such cases, you may wish to select the type directly instead (e.g. `Business`).
