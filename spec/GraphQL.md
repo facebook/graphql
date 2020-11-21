@@ -127,5 +127,3 @@ Note: This is an example of a non-normative note.
 # [Appendix: Notation Conventions](Appendix%20A%20--%20Notation%20Conventions.md)
 
 # [Appendix: Grammar Summary](Appendix%20B%20--%20Grammar%20Summary.md)
-
-# [Appendix: Schema Coordinates](Appendix%20C%20--%20Schema%20Coordinates.md)
