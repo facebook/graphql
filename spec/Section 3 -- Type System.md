@@ -366,9 +366,9 @@ type Mutation {
 }
 ```
 
-The following table demonstrates how to select various kinds of schema elements:
+The following table demonstrates how to select various kinds of schema members:
 
-|  Example                       | Description                                                         |
+| Schema Coordinate              | Description                                                         |
 | ------------------------------ | ------------------------------------------------------------------- |
 | `Business`                     | `Business` type                                                     |
 | `User`                         | `User` type                                                         |
