@@ -279,9 +279,10 @@ SchemaCoordinate: Name . Name
   4. Otherwise if {type} is an Input Object type:
     1. Let {inputFieldName} be the value of the second {Name}.
     2. Return the input field of {type} named {inputFieldName}.
-  5. Otherwise {type} must be an Object or Interface type:
-    1. Let {fieldName} be the value of the second {Name}.
-    2. Return the field of {type} named {fieldName}.
+  5. Otherwise:
+    1. Assert: {type} must be an Object or Interface type.
+    2. Let {fieldName} be the value of the second {Name}.
+    3. Return the field of {type} named {fieldName}.
   
 SchemaCoordinate: Name . Name ( Name : )
   1. Let {typeName} be the value of the first {Name}.
@@ -383,7 +384,7 @@ The following table demonstrates how to select various kinds of schema members:
 | `Address`                      | `Address` interface                                                 |
 | `Address.city`                 | `city` field on the `Address` interface                             |
 | `ReviewInput`                  | `ReviewInput` input object type                                     |
-| `ReviewInput.author`           | `author` field on the `ReviewInput` input object type               |
+| `ReviewInput.author`           | `author` input field on the `ReviewInput` input object type         |
 | `Entity`                       | `Entity` union definition                                           |
 | `DateTime`                     | Custom `DateTime` scalar type                                       |
 | `String`                       | Built-in `String` scalar type                                       |
