@@ -274,8 +274,8 @@ SchemaCoordinate: Name . Name
   1. Let {typeName} be the value of the first {Name}.
   2. Let {type} be the type in the schema named {typeName}.
   3. If {type} is an Enum type:
-    1. Let {enumName} be the value of the second {Name}.
-    2. Return the enum value of {type} named {enumName}.
+    1. Let {enumValueName} be the value of the second {Name}.
+    2. Return the enum value of {type} named {enumValueName}.
   4. Otherwise if {type} is an Input Object type:
     1. Let {inputFieldName} be the value of the second {Name}.
     2. Return the input field of {type} named {inputFieldName}.
