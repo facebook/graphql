@@ -253,7 +253,8 @@ Schema extensions have the potential to be invalid if incorrectly defined.
 
 ### Schema Coordinates
 
-Schema Coordinates are human readable strings that uniquely identify an element defined in a GraphQL Schema.
+Schema Coordinates are human readable strings that uniquely identify a specific
+type, field, argument, enum value, or directive defined in a GraphQL Schema.
 
 **Definition**
 
@@ -263,6 +264,12 @@ SchemaCoordinate:
   - Name . Name ( Name : )
   - @ Name
   - @ Name ( Name : )
+
+Note: The `SchemaCoordinate` syntax is not part of a GraphQL Document. Schema
+Coordinates are a separate syntax, intended to be used by tooling when
+referencing types and fields or other schema elements. (For example, a server
+that wishes to keep track of the number of times fields have been accessed may
+use their Schema Coordinate as the lookup key.)
 
 **Semantics**
 
@@ -307,7 +314,8 @@ SchemaCoordinate: @ Name ( Name : )
 
 **Examples**
 
-This section shows example coordinates for the possible schema element types this syntax covers.
+This section shows example coordinates for the possible schema element types
+this syntax covers.
 
 All examples below will assume the following schema:
 
@@ -367,16 +375,14 @@ type Mutation {
 }
 ```
 
-The following table demonstrates how to select various kinds of schema members:
+The following table shows examples of Schema Coordinates for elements in the
+schema above:
 
 | Schema Coordinate              | Description                                                         |
 | ------------------------------ | ------------------------------------------------------------------- |
 | `Business`                     | `Business` type                                                     |
-| `User`                         | `User` type                                                         |
-| `Business.name`                | `name` field on the `Business` type                                 |
 | `User.name`                    | `name` field on the `User` type                                     |
 | `Query.searchBusiness(name:)`  | `name` argument on the `searchBusiness` field on the `Query` type   |
-| `Query.searchBusiness(filter:)`| `filter` argument on the `searchBusiness` field on the `Query` type |
 | `SearchFilter`                 | `SearchFilter` enum                                                 |
 | `SearchFilter.OPEN_NOW`        | `OPEN_NOW` value of the`SearchFilter` enum                          |
 | `@private`                     | `@private` directive definition                                     |
@@ -389,15 +395,19 @@ The following table demonstrates how to select various kinds of schema members:
 | `DateTime`                     | Custom `DateTime` scalar type                                       |
 | `String`                       | Built-in `String` scalar type                                       |
 
-Note: You may not select members inside a union definition.
+Schema Coordinates are always unique. Each type, field, argument, enum value, or
+directive may be referenced by exactly one possible Schema Coordinate.
 
-The following counter example is *not* considered a valid Schema Coordinate:
+For example, the following is *not* a valid Schema Coordinate:
 
 ```graphql counter-example
 Entity.Business
 ```
 
-In such cases, you may wish to select the type directly instead (e.g. `Business`).
+In this counter example, both `Entity.Business` and `Business` would refer to
+the `Business` type. Since it would be ambiguous what the "primary key" should
+be in an application that uses Schema Coordinates to reference types, this is
+not allowed.
 
 ## Types
 
