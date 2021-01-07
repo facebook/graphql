@@ -404,10 +404,10 @@ For example, the following is *not* a valid Schema Coordinate:
 Entity.Business
 ```
 
-In this counter example, both `Entity.Business` and `Business` would refer to
-the `Business` type. Since it would be ambiguous what the "primary key" should
-be in an application that uses Schema Coordinates to reference types, this is
-not allowed.
+In this counter example, `Entity.Business` is redundant since `Business` already
+uniquely identifies the Business type. Such redundancy is disallowed by this
+spec - every type, field, field argument, enum value, directive, and directive
+argument has exactly one canonical Schema Coordinate.
 
 ## Types
 
