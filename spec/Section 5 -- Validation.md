@@ -247,13 +247,14 @@ query getName {
 * Let {subscriptionType} be the root Subscription type in {schema}.
 * Let {selectionSet} be the top level selection set on {subscription}.
 * Let {variableValues} be the empty set.
-* Let {groupedFieldSet} be the result of
-  {CollectFields(subscriptionType, selectionSet, variableValues)}.
-* {groupedFieldSet} must have exactly one entry.
+* Let {groupedFieldSetExcludingIntrospection} be the result of
+  {CollectFields(subscriptionType, selectionSet, variableValues, true)}.
+* {groupedFieldSetExcludingIntrospection} must have exactly one entry.
 
 **Explanatory Text**
 
-Subscription operations must have exactly one root field.
+Subscription operations must have exactly one non-introspection root field.
+(Subscription operations may have any number of introspection root fields.)
 
 Valid examples:
 
@@ -276,6 +277,18 @@ fragment newMessageFields on Subscription {
     body
     sender
   }
+}
+```
+
+Introspection fields are not counted. The following example is also valid:
+
+```graphql counter-example
+subscription sub {
+  newMessage {
+    body
+    sender
+  }
+  __typename
 }
 ```
 
@@ -305,22 +318,19 @@ fragment multipleSubscriptions on Subscription {
 }
 ```
 
-Introspection fields are counted. The following example is also invalid:
+Introspection fields are not counted. The following example is also invalid:
 
 ```graphql counter-example
 subscription sub {
-  newMessage {
-    body
-    sender
-  }
   __typename
 }
 ```
 
-Note: While each subscription must have exactly one root field, a document may
-contain any number of operations, each of which may contain different root
-fields. When executed, a document containing multiple subscription operations
-must provide the operation name as described in {GetOperation()}.
+Note: While each subscription must have exactly one non-introspection root
+field, a document may contain any number of operations, each of which may
+contain different root fields. When executed, a document containing multiple
+subscription operations must provide the operation name as described in
+{GetOperation()}.
 
 ## Fields
 

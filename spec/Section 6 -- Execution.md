@@ -250,10 +250,10 @@ CreateSourceEventStream(subscription, schema, variableValues, initialValue):
 
   * Let {subscriptionType} be the root Subscription type in {schema}.
   * Assert: {subscriptionType} is an Object type.
-  * Let {groupedFieldSet} be the result of
-    {CollectFields(subscriptionType, selectionSet, variableValues)}.
-  * If {groupedFieldSet} does not have exactly one entry, throw a query error.
-  * Let {fields} be the value of the first entry in {groupedFieldSet}.
+  * Let {groupedFieldSetExcludingIntrospection} be the result of
+    {CollectFields(subscriptionType, selectionSet, variableValues, true)}.
+  * If {groupedFieldSetExcludingIntrospection} does not have exactly one entry, throw a query error.
+  * Let {fields} be the value of the first entry in {groupedFieldSetExcludingIntrospection}.
   * Let {fieldName} be the name of the first entry in {fields}.
     Note: This value is unaffected if an alias is used.
   * Let {field} be the first entry in {fields}.
@@ -477,8 +477,9 @@ The depth-first-search order of the field groups produced by {CollectFields()}
 is maintained through execution, ensuring that fields appear in the executed
 response in a stable and predictable order.
 
-CollectFields(objectType, selectionSet, variableValues, visitedFragments):
+CollectFields(objectType, selectionSet, variableValues, excludeIntrospection, visitedFragments):
 
+  * If {excludeIntrospection} is not provided, initialize it to {false}.
   * If {visitedFragments} is not provided, initialize it to the empty set.
   * Initialize {groupedFields} to an empty ordered map of lists.
   * For each {selection} in {selectionSet}:
@@ -489,10 +490,12 @@ CollectFields(objectType, selectionSet, variableValues, visitedFragments):
       * If {includeDirective}'s {if} argument is not {true} and is not a variable in {variableValues} with the value {true}, continue with the next
       {selection} in {selectionSet}.
     * If {selection} is a {Field}:
-      * Let {responseKey} be the response key of {selection} (the alias if defined, otherwise the field name).
-      * Let {groupForResponseKey} be the list in {groupedFields} for
-        {responseKey}; if no such list exists, create it as an empty list.
-      * Append {selection} to the {groupForResponseKey}.
+      * Let {fieldName} be the field name of {selection}.
+      * If {excludeIntrospection} is {false} or {fieldName} does not begin with the characters "__" (two underscores):
+        * Let {responseKey} be the response key of {selection} (the alias if defined, otherwise the field name).
+        * Let {groupForResponseKey} be the list in {groupedFields} for
+          {responseKey}; if no such list exists, create it as an empty list.
+        * Append {selection} to the {groupForResponseKey}.
     * If {selection} is a {FragmentSpread}:
       * Let {fragmentSpreadName} be the name of {selection}.
       * If {fragmentSpreadName} is in {visitedFragments}, continue with the
@@ -507,7 +510,7 @@ CollectFields(objectType, selectionSet, variableValues, visitedFragments):
         with the next {selection} in {selectionSet}.
       * Let {fragmentSelectionSet} be the top-level selection set of {fragment}.
       * Let {fragmentGroupedFieldSet} be the result of calling
-        {CollectFields(objectType, fragmentSelectionSet, variableValues, visitedFragments)}.
+        {CollectFields(objectType, fragmentSelectionSet, variableValues, excludeIntrospection, visitedFragments)}.
       * For each {fragmentGroup} in {fragmentGroupedFieldSet}:
         * Let {responseKey} be the response key shared by all fields in {fragmentGroup}.
         * Let {groupForResponseKey} be the list in {groupedFields} for
@@ -518,7 +521,7 @@ CollectFields(objectType, selectionSet, variableValues, visitedFragments):
       * If {fragmentType} is not {null} and {DoesFragmentTypeApply(objectType, fragmentType)} is false, continue
         with the next {selection} in {selectionSet}.
       * Let {fragmentSelectionSet} be the top-level selection set of {selection}.
-      * Let {fragmentGroupedFieldSet} be the result of calling {CollectFields(objectType, fragmentSelectionSet, variableValues, visitedFragments)}.
+      * Let {fragmentGroupedFieldSet} be the result of calling {CollectFields(objectType, fragmentSelectionSet, variableValues, excludeIntrospection, visitedFragments)}.
       * For each {fragmentGroup} in {fragmentGroupedFieldSet}:
         * Let {responseKey} be the response key shared by all fields in {fragmentGroup}.
         * Let {groupForResponseKey} be the list in {groupedFields} for
