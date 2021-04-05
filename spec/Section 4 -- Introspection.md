@@ -147,6 +147,9 @@ type __Type {
 
   # should be non-null for NON_NULL and LIST only, must be null for the others
   ofType: __Type
+
+  # should be non-null for INPUT_OBJECT only
+  oneOf: Boolean
 }
 
 type __Field {
@@ -156,6 +159,7 @@ type __Field {
   type: __Type!
   isDeprecated: Boolean!
   deprecationReason: String
+  oneOf: Boolean!
 }
 
 type __InputValue {
@@ -336,6 +340,8 @@ Fields
 * `name` must return a String.
 * `description` may return a String or {null}.
 * `inputFields`: a list of `InputValue`.
+* `oneOf` must return {true} for Oneof Input Objects, {false} for all other
+  Input Objects.
 * All other fields must return {null}.
 
 
@@ -380,6 +386,7 @@ Fields
 * `isDeprecated` returns {true} if this field should no longer be used,
   otherwise {false}.
 * `deprecationReason` optionally provides a reason why this field is deprecated.
+* `oneOf` must return {true} for Oneof Fields, {false} for all other Fields.
 
 
 ### The __InputValue Type

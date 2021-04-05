@@ -40,6 +40,10 @@ type Query {
   dog: Dog
 }
 
+type Mutation {
+  addPet(pet: PetInput): Pet
+}
+
 enum DogCommand { SIT, DOWN, HEEL }
 
 type Dog implements Pet {
@@ -81,6 +85,23 @@ type Cat implements Pet {
 union CatOrDog = Cat | Dog
 union DogOrHuman = Dog | Human
 union HumanOrAlien = Human | Alien
+
+input CatInput {
+  name: String!
+  nickname: String
+  meowVolume: Int
+}
+
+input DogInput {
+  name: String!
+  nickname: String
+  barkVolume: Int
+}
+
+input PetInput @oneOf {
+  cat: CatInput
+  dog: DogInput
+}
 ```
 
 
@@ -780,6 +801,27 @@ fragment missingRequiredArg on Arguments {
 }
 ```
 
+#### Oneof Fields Have Exactly One Argument
+
+* For each {operation} in {document}:
+  * Let {oneofFields} be all Oneof Fields transitively included in the {operation}.
+  * For each {oneofField} in {oneofFields}:
+    * Let {arguments} be the arguments provided by {oneofField}.
+    * {arguments} must contain exactly one entry.
+    * Let {argument} be the sole entry in {arguments}.
+    * Let {value} be the value of {argument}.
+    * {value} must not be the {null} literal.
+    * If {value} is a variable:
+      * Let {variableName} be the name of {variable}.
+      * Let {variableDefinition} be the {VariableDefinition} named {variableName} defined within {operation}.
+      * Let {variableType} be the expected type of {variableDefinition}.
+      * {variableType} must be a non-null type.
+
+**Explanatory Text**
+
+Oneof Fields require that exactly one argument must be supplied and that
+argument must not be null.
+
 ## Fragments
 
 ### Fragment Declarations
@@ -1424,6 +1466,103 @@ arguments, an input object may have required fields. An input field is required
 if it has a non-null type and does not have a default value. Otherwise, the
 input object field is optional.
 
+### Oneof Input Objects Have Exactly One Field
+
+**Formal Specification**
+
+* For each {operation} in {document}:
+  * Let {oneofInputObjects} be all Oneof Input Objects transitively included in the {operation}.
+  * For each {oneofInputObject} in {oneofInputObjects}:
+    * Let {fields} be the fields provided by {oneofInputObject}.
+    * {fields} must contain exactly one entry.
+    * Let {field} be the sole entry in {fields}.
+    * Let {value} be the value of {field}.
+    * {value} must not be the {null} literal.
+    * If {value} is a variable:
+      * Let {variableName} be the name of {variable}.
+      * Let {variableDefinition} be the {VariableDefinition} named {variableName} defined within {operation}.
+      * Let {variableType} be the expected type of {variableDefinition}.
+      * {variableType} must be a non-null type.
+
+**Explanatory Text**
+
+Oneof Input Objects require that exactly one field must be supplied and that
+field must not be {null}.
+
+An empty Oneof Input Object is invalid.
+
+```graphgl counter-example
+query addPet {
+  addPet(pet: {}) {
+    name
+  }
+}
+```
+
+Multiple fields are not allowed.
+
+```graphgl counter-example
+query addPet($cat: CatInput, $dog: DogInput) {
+  addPet(pet: {cat: $cat, dog: $dog}) {
+    name
+  }
+}
+```
+
+```graphgl counter-example
+query addPet($dog: DogInput) {
+  addPet(pet: { cat: { name: "Brontie" }, dog: $dog }) {
+    name
+  }
+}
+```
+
+```graphgl counter-example
+query addPet {
+  addPet(pet: { cat: { name: "Brontie" }, dog: null }) {
+    name
+  }
+}
+```
+
+
+Variables used for Oneof Input Object fields must be non-nullable.
+
+```graphgl example
+query addPet($cat: CatInput!) {
+  addPet(pet: { cat: $cat }) {
+    name
+  }
+}
+```
+
+```graphgl counter-example
+query addPet($cat: CatInput) {
+  addPet(pet: { cat: $cat }) {
+    name
+  }
+}
+```
+
+
+If a field with a literal value is present then the value must
+not be {null}.
+
+```graphgl example
+query addPet {
+  addPet(pet: { cat: { name: "Brontie" } }) {
+    name
+  }
+}
+```
+
+```graphgl counter-example
+query addPet {
+  addPet(pet: { cat: null }) {
+    name
+  }
+}
+```
 
 ## Directives
 
