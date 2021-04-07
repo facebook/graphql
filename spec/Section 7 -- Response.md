@@ -8,10 +8,10 @@ request.
 A response may contain both a partial response as well as encountered errors in
 the case that a field error occurred on a field which was replaced with {null}.
 
+A response to a GraphQL operation must be a map or an event stream of maps. The
+value of this map is described in the "Response Format" section.
 
 ## Response Format
-
-A response to a GraphQL operation must be a map.
 
 If the operation encountered any errors, the response map must contain an
 entry with key `errors`. The value of this entry is described in the "Errors"
@@ -22,6 +22,24 @@ If the operation included execution, the response map must contain an entry
 with key `data`. The value of this entry is described in the "Data" section. If
 the operation failed before execution, due to a syntax error, missing
 information, or validation error, this entry must not be present.
+
+When the response of the GraphQL operation is an event stream, the first value
+will be the initial response. All subsequent values may contain `label` and 
+`path` entries. These two entries are used by clients to identify the the 
+`@defer` or `@stream` directive from the GraphQL operation that triggered this
+value to be returned by the event stream. The combination of these two entries
+must be unique across all values returned by the event stream. 
+
+If the response of the GraphQL operation is an event stream, each response map
+must contain an entry with key `hasNext`. The value of this entry is `true` for
+all but the last response in the stream. The value of this entry is `false` for 
+the last response of the stream. This entry is not required for GraphQL 
+operations that return a single response map. 
+
+The GraphQL server may determine there are no more values in the event stream 
+after a previous value with `hasNext` equal to `true` has been emitted. In this case 
+the last value in the event stream should be a map without `data`, `label`, 
+and `path` entries, and a `hasNext` entry with a value of `false`.
 
 The response map may also contain an entry with key `extensions`. This entry,
 if set, must have a map as its value. This entry is reserved for implementors
@@ -42,6 +60,11 @@ The `data` entry in the response will be the result of the execution of the
 requested operation. If the operation was a query, this output will be an
 object of the schema's query root type; if the operation was a mutation, this
 output will be an object of the schema's mutation root type.
+
+If the result of the operation is an event stream, the `data` entry in 
+subsequent values will be an object of the type of a particular field in the
+GraphQL result. The adjacent `path` field will contain the path segments of 
+the field this data is associated with.
 
 If an error was encountered before execution begins, the `data` entry should
 not be present in the result.
@@ -82,14 +105,8 @@ associated syntax element.
 If an error can be associated to a particular field in the GraphQL result, it
 must contain an entry with the key `path` that details the path of the
 response field which experienced the error. This allows clients to identify
-whether a `null` result is intentional or caused by a runtime error.
-
-This field should be a list of path segments starting at the root of the
-response and ending with the field associated with the error. Path segments
-that represent fields should be strings, and path segments that
-represent list indices should be 0-indexed integers. If the error happens
-in an aliased field, the path to the error should use the aliased name, since
-it represents a path in the response, not in the query.
+whether a `null` result is intentional or caused by a runtime error. The value 
+of this field is described in the "Path" section.
 
 For example, if fetching one of the friends' names fails in the following
 query:
@@ -219,6 +236,30 @@ still discouraged.
 }
 ```
 
+
+## Path
+
+A `path` field allows for the association to a particular field in a GraphQL 
+result. This field should be a list of path segments starting at the root of the
+response and ending with the field to be associated with. Path segments
+that represent fields should be strings, and path segments that
+represent list indices should be 0-indexed integers. If the path is associated to
+an aliased field, the path should use the aliased name, since it represents a path in the response, not in the query.
+
+When the `path` field is present on a GraphQL response, it indicates that the 
+`data` field is not the root query or mutation result, but is rather associated to
+a particular field in the root result.
+
+When the `path` field is present on an "Error result", it indicates the response field which experienced the error.
+
+## Label
+
+If the response of the GraphQL operation is an event stream, subsequent values
+may contain a string field `label`. This `label` is the same label passed to 
+the `@defer` or `@stream` directive that triggered this value. This allows 
+clients to identify which `@defer` or `@stream` directive is associated with
+this value. `label` will not be present if the corresponding `@defer` or 
+`@stream` directive is not passed a `label` argument.
 
 ## Serialization Format
 

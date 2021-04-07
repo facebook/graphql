@@ -419,6 +419,7 @@ FieldsInSetCanMerge(set):
     {set} including visiting fragments and inline fragments.
   * Given each pair of members {fieldA} and {fieldB} in {fieldsForName}:
     * {SameResponseShape(fieldA, fieldB)} must be true.
+    * {SameStreamDirective(fieldA, fieldB)} must be true.
     * If the parent types of {fieldA} and {fieldB} are equal or if either is not
       an Object Type:
       * {fieldA} and {fieldB} must have identical field names.
@@ -451,6 +452,16 @@ SameResponseShape(fieldA, fieldB):
   * Given each pair of members {subfieldA} and {subfieldB} in {fieldsForName}:
     * If {SameResponseShape(subfieldA, subfieldB)} is false, return false.
   * Return true.
+
+SameStreamDirective(fieldA, fieldB):
+
+  * If neither {fieldA} nor {fieldB} has a directive named `stream`.
+    * Return true.
+  * If both {fieldA} and {fieldB} have a directive named `stream`.
+    * Let {streamA} be the directive named `stream` on {fieldA}.
+    * Let {streamB} be the directive named `stream` on {fieldB}.
+    * If {streamA} and {streamB} have identical sets of arguments, return true.
+  * Return false.
 
 **Explanatory Text**
 
@@ -1519,6 +1530,31 @@ query ($foo: Boolean = true, $bar: Boolean = false) {
 }
 ```
 
+### Stream Directives Are Used On List Fields
+
+**Formal Specification**
+
+* For every {directive} in a document.
+* Let {directiveName} be the name of {directive}.
+* If {directiveName} is "stream":
+  * Let {adjacent} be the AST node the directive affects.
+  * {adjacent} must be a List type.
+
+**Explanatory Text**
+
+GraphQL directive locations do not provide enough granularity to distinguish
+the type of fields used in a GraphQL document. Since the stream directive is
+only valid on list fields, an additional validation rule must be used to ensure
+it is used correctly.
+
+For example the following query will only pass validation if `field` is defined
+as a List type in the associated schema.
+
+```graphql counter-example
+query {
+  field @stream(initialCount: 0)
+}
+```
 
 ## Variables
 
