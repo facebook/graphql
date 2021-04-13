@@ -251,163 +251,6 @@ Schema extensions have the potential to be invalid if incorrectly defined.
 2. Any non-repeatable directives provided must not already apply to the
    original Schema.
 
-### Schema Coordinates
-
-Schema Coordinates are human readable strings that uniquely identify a specific
-type, field, argument, enum value, or directive defined in a GraphQL Schema.
-
-SchemaCoordinate :
-  - Name
-  - Name . Name
-  - Name . Name ( Name : )
-  - @ Name
-  - @ Name ( Name : )
-
-Note: A {SchemaCoordinate} is not a definition within a GraphQL {Document}.
-Schema coordinates are a separate syntax, intended to be used by tools to
-reference types and fields or other schema elements. For example: within
-documentation, or as lookup keys a service uses to track usage frequency.
-
-**Semantics**
-
-A schema coordinate's semantics assume they are interpreted in the context of
-a single GraphQL {schema}.
-
-SchemaCoordinate : Name
-  1. Let {typeName} be the value of the first {Name}.
-  2. Return the type in the {schema} named {typeName}.
-
-SchemaCoordinate : Name . Name
-  1. Let {typeName} be the value of the first {Name}.
-  2. Let {type} be the type in the {schema} named {typeName}.
-  3. If {type} is an Enum type:
-    1. Let {enumValueName} be the value of the second {Name}.
-    2. Return the enum value of {type} named {enumValueName}.
-  4. Otherwise if {type} is an Input Object type:
-    1. Let {inputFieldName} be the value of the second {Name}.
-    2. Return the input field of {type} named {inputFieldName}.
-  5. Otherwise:
-    1. Assert {type} must be an Object or Interface type.
-    2. Let {fieldName} be the value of the second {Name}.
-    3. Return the field of {type} named {fieldName}.
-
-SchemaCoordinate : Name . Name ( Name : )
-  1. Let {typeName} be the value of the first {Name}.
-  2. Let {type} be the type in the {schema} named {typeName}.
-  3. Assert {type} must be an Object or Interface type.
-  4. Let {fieldName} be the value of the second {Name}.
-  5. Let {field} be the field of {type} named {fieldName}.
-  6. Assert {field} must exist.
-  7. Let {argumentName} be the value of the third {Name}.
-  8. Return the argument of {field} named {argumentName}.
-
-SchemaCoordinate : @ Name
-  1. Let {directiveName} be the value of the first {Name}.
-  2. Return the directive in the {schema} named {directiveName}.
-
-SchemaCoordinate : @ Name ( Name : )
-  1. Let {directiveName} be the value of the first {Name}.
-  2. Let {directive} be the directive in the {schema} named {directiveName}.
-  3. Assert {directive} must exist.
-  7. Let {argumentName} be the value of the second {Name}.
-  8. Return the argument of {directive} named {argumentName}.
-
-**Examples**
-
-This section shows example coordinates for the possible schema element types
-this syntax covers.
-
-All examples below will assume the following schema:
-
-```graphql example
-directive @private(scope: String!) on FIELD
-
-scalar DateTime
-
-input ReviewInput {
-  content: String
-  author: String
-  businessId: String
-}
-
-interface Address {
-    city: String
-}
-
-type User implements Address {
-    name: String
-    reviewCount: Int
-    friends: [User]
-    email: String @private(scope: "loggedIn")
-    city: String
-}
-
-type Business implements Address {
-    name: String
-    address: String
-    rating: Int
-    city: String
-    reviews: [Review]
-    createdAt: DateTime
-}
-
-type Review {
-    content: String
-    author: User
-    business: Business
-    createdAt: DateTime
-}
-
-union Entity = User | Business | Review
-
-enum SearchFilter {
-    OPEN_NOW
-    DELIVERS_TAKEOUT
-    VEGETARIAN_MENU
-}
-
-type Query {
-    searchBusiness(name: String!, filter: SearchFilter): Business
-}
-
-type Mutation {
-    addReview(input: ReviewInput!): Review
-}
-```
-
-The following table shows examples of Schema Coordinates for elements in the
-schema above:
-
-| Schema Coordinate              | Description                                                         |
-| ------------------------------ | ------------------------------------------------------------------- |
-| `Business`                     | `Business` type                                                     |
-| `User.name`                    | `name` field on the `User` type                                     |
-| `Query.searchBusiness(name:)`  | `name` argument on the `searchBusiness` field on the `Query` type   |
-| `SearchFilter`                 | `SearchFilter` enum                                                 |
-| `SearchFilter.OPEN_NOW`        | `OPEN_NOW` value of the`SearchFilter` enum                          |
-| `@private`                     | `@private` directive definition                                     |
-| `@private(scope:)`             | `scope` argument on the `@private` directive definition             |
-| `Address`                      | `Address` interface                                                 |
-| `Address.city`                 | `city` field on the `Address` interface                             |
-| `ReviewInput`                  | `ReviewInput` input object type                                     |
-| `ReviewInput.author`           | `author` input field on the `ReviewInput` input object type         |
-| `Entity`                       | `Entity` union definition                                           |
-| `DateTime`                     | Custom `DateTime` scalar type                                       |
-| `String`                       | Built-in `String` scalar type                                       |
-
-Schema Coordinates are always unique. Each type, field, argument, enum value, or
-directive may be referenced by exactly one possible Schema Coordinate.
-
-For example, the following is *not* a valid Schema Coordinate:
-
-```graphql counter-example
-Entity.Business
-```
-
-In this counter example, `Entity.Business` is redundant since `Business` already
-uniquely identifies the Business type. Such redundancy is disallowed by this
-spec - every type, field, field argument, enum value, directive, and directive
-argument has exactly one canonical Schema Coordinate.
 
 ## Types
 
@@ -2224,3 +2067,161 @@ to the relevant IETF specification.
 ```graphql example
 scalar UUID @specifiedBy(url: "https://tools.ietf.org/html/rfc4122")
 ```
+
+## Schema Coordinates
+
+Schema Coordinates are human readable strings that uniquely identify a specific
+type, field, argument, enum value, or directive defined in a GraphQL Schema.
+
+SchemaCoordinate :
+  - Name
+  - Name . Name
+  - Name . Name ( Name : )
+  - @ Name
+  - @ Name ( Name : )
+
+Note: A {SchemaCoordinate} is not a definition within a GraphQL {Document}.
+Schema coordinates are a separate syntax, intended to be used by tools to
+reference types and fields or other schema elements. For example: within
+documentation, or as lookup keys a service uses to track usage frequency.
+
+**Semantics**
+
+A schema coordinate's semantics assume they are interpreted in the context of
+a single GraphQL {schema}.
+
+SchemaCoordinate : Name
+  1. Let {typeName} be the value of the first {Name}.
+  2. Return the type in the {schema} named {typeName}.
+
+SchemaCoordinate : Name . Name
+  1. Let {typeName} be the value of the first {Name}.
+  2. Let {type} be the type in the {schema} named {typeName}.
+  3. If {type} is an Enum type:
+    1. Let {enumValueName} be the value of the second {Name}.
+    2. Return the enum value of {type} named {enumValueName}.
+  4. Otherwise if {type} is an Input Object type:
+    1. Let {inputFieldName} be the value of the second {Name}.
+    2. Return the input field of {type} named {inputFieldName}.
+  5. Otherwise:
+    1. Assert {type} must be an Object or Interface type.
+    2. Let {fieldName} be the value of the second {Name}.
+    3. Return the field of {type} named {fieldName}.
+
+SchemaCoordinate : Name . Name ( Name : )
+  1. Let {typeName} be the value of the first {Name}.
+  2. Let {type} be the type in the {schema} named {typeName}.
+  3. Assert {type} must be an Object or Interface type.
+  4. Let {fieldName} be the value of the second {Name}.
+  5. Let {field} be the field of {type} named {fieldName}.
+  6. Assert {field} must exist.
+  7. Let {argumentName} be the value of the third {Name}.
+  8. Return the argument of {field} named {argumentName}.
+
+SchemaCoordinate : @ Name
+  1. Let {directiveName} be the value of the first {Name}.
+  2. Return the directive in the {schema} named {directiveName}.
+
+SchemaCoordinate : @ Name ( Name : )
+  1. Let {directiveName} be the value of the first {Name}.
+  2. Let {directive} be the directive in the {schema} named {directiveName}.
+  3. Assert {directive} must exist.
+  7. Let {argumentName} be the value of the second {Name}.
+  8. Return the argument of {directive} named {argumentName}.
+
+**Examples**
+
+This section shows example coordinates for the possible schema element types
+this syntax covers.
+
+All examples below will assume the following schema:
+
+```graphql example
+directive @private(scope: String!) on FIELD
+
+scalar DateTime
+
+input ReviewInput {
+  content: String
+  author: String
+  businessId: String
+}
+
+interface Address {
+    city: String
+}
+
+type User implements Address {
+    name: String
+    reviewCount: Int
+    friends: [User]
+    email: String @private(scope: "loggedIn")
+    city: String
+}
+
+type Business implements Address {
+    name: String
+    address: String
+    rating: Int
+    city: String
+    reviews: [Review]
+    createdAt: DateTime
+}
+
+type Review {
+    content: String
+    author: User
+    business: Business
+    createdAt: DateTime
+}
+
+union Entity = User | Business | Review
+
+enum SearchFilter {
+    OPEN_NOW
+    DELIVERS_TAKEOUT
+    VEGETARIAN_MENU
+}
+
+type Query {
+    searchBusiness(name: String!, filter: SearchFilter): Business
+}
+
+type Mutation {
+    addReview(input: ReviewInput!): Review
+}
+```
+
+The following table shows examples of Schema Coordinates for elements in the
+schema above:
+
+| Schema Coordinate              | Description                                                         |
+| ------------------------------ | ------------------------------------------------------------------- |
+| `Business`                     | `Business` type                                                     |
+| `User.name`                    | `name` field on the `User` type                                     |
+| `Query.searchBusiness(name:)`  | `name` argument on the `searchBusiness` field on the `Query` type   |
+| `SearchFilter`                 | `SearchFilter` enum                                                 |
+| `SearchFilter.OPEN_NOW`        | `OPEN_NOW` value of the`SearchFilter` enum                          |
+| `@private`                     | `@private` directive definition                                     |
+| `@private(scope:)`             | `scope` argument on the `@private` directive definition             |
+| `Address`                      | `Address` interface                                                 |
+| `Address.city`                 | `city` field on the `Address` interface                             |
+| `ReviewInput`                  | `ReviewInput` input object type                                     |
+| `ReviewInput.author`           | `author` input field on the `ReviewInput` input object type         |
+| `Entity`                       | `Entity` union definition                                           |
+| `DateTime`                     | Custom `DateTime` scalar type                                       |
+| `String`                       | Built-in `String` scalar type                                       |
+
+Schema Coordinates are always unique. Each type, field, argument, enum value, or
+directive may be referenced by exactly one possible Schema Coordinate.
+
+For example, the following is *not* a valid Schema Coordinate:
+
+```graphql counter-example
+Entity.Business
+```
+
+In this counter example, `Entity.Business` is redundant since `Business` already
+uniquely identifies the Business type. Such redundancy is disallowed by this
+spec - every type, field, field argument, enum value, directive, and directive
+argument has exactly one canonical Schema Coordinate.

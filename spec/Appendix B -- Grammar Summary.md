@@ -235,13 +235,6 @@ SchemaExtension :
 
 RootOperationTypeDefinition : OperationType : NamedType
 
-SchemaCoordinate :
-  - Name
-  - Name . Name
-  - Name . Name ( Name : )
-  - @ Name
-  - @ Name ( Name : )
-
 Description : StringValue
 
 TypeDefinition :
@@ -359,3 +352,10 @@ TypeSystemDirectiveLocation : one of
   - `ENUM_VALUE`
   - `INPUT_OBJECT`
   - `INPUT_FIELD_DEFINITION`
+
+SchemaCoordinate :
+  - Name
+  - Name . Name
+  - Name . Name ( Name : )
+  - @ Name
+  - @ Name ( Name : )
