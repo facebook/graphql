@@ -235,6 +235,13 @@ SchemaExtension :
 
 RootOperationTypeDefinition : OperationType : NamedType
 
+SchemaCoordinate :
+  - Name
+  - Name . Name
+  - Name . Name ( Name : )
+  - @ Name
+  - @ Name ( Name : )
+
 Description : StringValue
 
 TypeDefinition :

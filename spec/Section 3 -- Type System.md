@@ -256,30 +256,30 @@ Schema extensions have the potential to be invalid if incorrectly defined.
 Schema Coordinates are human readable strings that uniquely identify a specific
 type, field, argument, enum value, or directive defined in a GraphQL Schema.
 
-**Definition**
-
-SchemaCoordinate:
+SchemaCoordinate :
   - Name
   - Name . Name
   - Name . Name ( Name : )
   - @ Name
   - @ Name ( Name : )
 
-Note: The `SchemaCoordinate` syntax is not part of a GraphQL Document. Schema
-Coordinates are a separate syntax, intended to be used by tooling when
-referencing types and fields or other schema elements. (For example, a server
-that wishes to keep track of the number of times fields have been accessed may
-use their Schema Coordinate as the lookup key.)
+Note: A {SchemaCoordinate} is not a definition within a GraphQL {Document}.
+Schema coordinates are a separate syntax, intended to be used by tools to
+reference types and fields or other schema elements. For example: within
+documentation, or as lookup keys a service uses to track usage frequency.
 
 **Semantics**
 
-SchemaCoordinate: Name
-  1. Let {typeName} be the value of the first {Name}.
-  2. Return the type in the schema named {typeName}.
+A schema coordinate's semantics assume they are interpreted in the context of
+a single GraphQL {schema}.
 
-SchemaCoordinate: Name . Name
+SchemaCoordinate : Name
   1. Let {typeName} be the value of the first {Name}.
-  2. Let {type} be the type in the schema named {typeName}.
+  2. Return the type in the {schema} named {typeName}.
+
+SchemaCoordinate : Name . Name
+  1. Let {typeName} be the value of the first {Name}.
+  2. Let {type} be the type in the {schema} named {typeName}.
   3. If {type} is an Enum type:
     1. Let {enumValueName} be the value of the second {Name}.
     2. Return the enum value of {type} named {enumValueName}.
@@ -287,30 +287,30 @@ SchemaCoordinate: Name . Name
     1. Let {inputFieldName} be the value of the second {Name}.
     2. Return the input field of {type} named {inputFieldName}.
   5. Otherwise:
-    1. Assert: {type} must be an Object or Interface type.
+    1. Assert {type} must be an Object or Interface type.
     2. Let {fieldName} be the value of the second {Name}.
     3. Return the field of {type} named {fieldName}.
-  
-SchemaCoordinate: Name . Name ( Name : )
+
+SchemaCoordinate : Name . Name ( Name : )
   1. Let {typeName} be the value of the first {Name}.
-  2. Let {type} be the type in the schema named {typeName}.
-  3. Assert: {type} must be an Object or Interface type.
+  2. Let {type} be the type in the {schema} named {typeName}.
+  3. Assert {type} must be an Object or Interface type.
   4. Let {fieldName} be the value of the second {Name}.
   5. Let {field} be the field of {type} named {fieldName}.
-  6. Assert: {field} must exist.
+  6. Assert {field} must exist.
   7. Let {argumentName} be the value of the third {Name}.
   8. Return the argument of {field} named {argumentName}.
 
-SchemaCoordinate: @ Name
+SchemaCoordinate : @ Name
   1. Let {directiveName} be the value of the first {Name}.
-  2. Return the directive in the schema named {directiveName}.
+  2. Return the directive in the {schema} named {directiveName}.
 
-SchemaCoordinate: @ Name ( Name : )
+SchemaCoordinate : @ Name ( Name : )
   1. Let {directiveName} be the value of the first {Name}.
-  2. Let {directive} be the directive in the schema named {directiveName}.
-  3. Assert: {directive} must exist.
+  2. Let {directive} be the directive in the {schema} named {directiveName}.
+  3. Assert {directive} must exist.
   7. Let {argumentName} be the value of the second {Name}.
-  8. Return the argument of {directive} named {argumentName}
+  8. Return the argument of {directive} named {argumentName}.
 
 **Examples**
 
