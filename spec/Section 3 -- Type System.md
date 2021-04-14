@@ -2070,9 +2070,6 @@ scalar UUID @specifiedBy(url: "https://tools.ietf.org/html/rfc4122")
 
 ## Schema Coordinates
 
-Schema Coordinates are human readable strings that uniquely identify a specific
-type, field, argument, enum value, or directive defined in a GraphQL Schema.
-
 SchemaCoordinate :
   - Name
   - Name . Name
@@ -2080,15 +2077,28 @@ SchemaCoordinate :
   - @ Name
   - @ Name ( Name : )
 
-Note: A {SchemaCoordinate} is not a definition within a GraphQL {Document}.
-Schema coordinates are a separate syntax, intended to be used by tools to
-reference types and fields or other schema elements. For example: within
-documentation, or as lookup keys a service uses to track usage frequency.
+:: A *schema coordinate* is a human readable string that uniquely identifies a
+*schema element* within a GraphQL Schema.
+
+:: A *schema element* is a specific instance of a named type, type field,
+input field, enum value, field argument, directive, or directive argument.
+
+A *schema coordinate* is always unique. Each *schema element* may be referenced
+by exactly one possible schema coordinate.
+
+A *schema coordinate* may refer to either a defined or built-in *schema element*.
+For example, `String` and `@deprecated(reason:)` are both valid schema
+coordinates which refer to built-in schema elements.
+
+Note: A {SchemaCoordinate} is not a definition within a GraphQL {Document}, but
+a separate stand-alone grammar, intended to be used by tools to reference types,
+fields, and other *schema element*s. For example as references within
+documentation, or as lookup keys in usage frequency tracking.
 
 **Semantics**
 
-A schema coordinate's semantics assume they are interpreted in the context of
-a single GraphQL {schema}.
+To refer to a *schema element*, a *schema coordinate* must be interpreted in the
+context of a GraphQL {schema}.
 
 SchemaCoordinate : Name
   1. Let {typeName} be the value of the first {Name}.
@@ -2131,97 +2141,40 @@ SchemaCoordinate : @ Name ( Name : )
 
 **Examples**
 
-This section shows example coordinates for the possible schema element types
-this syntax covers.
+| Element Kind       | *Schema Coordinate*              | *Schema Element*                                                        |
+| ------------------ | -------------------------------- | ----------------------------------------------------------------------- |
+| Named Type         | `Business`                       | `Business` type                                                         |
+| Type Field         | `Business.name`                  | `name` field on the `Business` type                                     |
+| Input Field        | `SearchCriteria.filter`          | `filter` input field on the `SearchCriteria` input object type          |
+| Enum Value         | `SearchFilter.OPEN_NOW`          | `OPEN_NOW` value of the `SearchFilter` enum                             |
+| Field Argument     | `Query.searchBusiness(criteria:)`| `criteria` argument on the `searchBusiness` field on the `Query` type   |
+| Directive          | `@private`                       | `@private` directive                                                    |
+| Directive Argument | `@private(scope:)`               | `scope` argument on the `@private` directive                            |
 
-All examples below will assume the following schema:
+The table above shows an example of a *schema coordinate* for every kind of
+*schema element* based on the schema below.
 
-```graphql example
-directive @private(scope: String!) on FIELD
-
-scalar DateTime
-
-input ReviewInput {
-  content: String
-  author: String
-  businessId: String
+```graphql
+type Query {
+  searchBusiness(criteria: SearchCriteria!): [Business]
 }
 
-interface Address {
-    city: String
+input SearchCriteria {
+  name: String
+  filter: SearchFilter
 }
-
-type User implements Address {
-    name: String
-    reviewCount: Int
-    friends: [User]
-    email: String @private(scope: "loggedIn")
-    city: String
-}
-
-type Business implements Address {
-    name: String
-    address: String
-    rating: Int
-    city: String
-    reviews: [Review]
-    createdAt: DateTime
-}
-
-type Review {
-    content: String
-    author: User
-    business: Business
-    createdAt: DateTime
-}
-
-union Entity = User | Business | Review
 
 enum SearchFilter {
-    OPEN_NOW
-    DELIVERS_TAKEOUT
-    VEGETARIAN_MENU
+  OPEN_NOW
+  DELIVERS_TAKEOUT
+  VEGETARIAN_MENU
 }
 
-type Query {
-    searchBusiness(name: String!, filter: SearchFilter): Business
+type Business {
+  id: ID
+  name: String
+  email: String @private(scope: "loggedIn")
 }
 
-type Mutation {
-    addReview(input: ReviewInput!): Review
-}
+directive @private(scope: String!) on FIELD
 ```
-
-The following table shows examples of Schema Coordinates for elements in the
-schema above:
-
-| Schema Coordinate              | Description                                                         |
-| ------------------------------ | ------------------------------------------------------------------- |
-| `Business`                     | `Business` type                                                     |
-| `User.name`                    | `name` field on the `User` type                                     |
-| `Query.searchBusiness(name:)`  | `name` argument on the `searchBusiness` field on the `Query` type   |
-| `SearchFilter`                 | `SearchFilter` enum                                                 |
-| `SearchFilter.OPEN_NOW`        | `OPEN_NOW` value of the`SearchFilter` enum                          |
-| `@private`                     | `@private` directive definition                                     |
-| `@private(scope:)`             | `scope` argument on the `@private` directive definition             |
-| `Address`                      | `Address` interface                                                 |
-| `Address.city`                 | `city` field on the `Address` interface                             |
-| `ReviewInput`                  | `ReviewInput` input object type                                     |
-| `ReviewInput.author`           | `author` input field on the `ReviewInput` input object type         |
-| `Entity`                       | `Entity` union definition                                           |
-| `DateTime`                     | Custom `DateTime` scalar type                                       |
-| `String`                       | Built-in `String` scalar type                                       |
-
-Schema Coordinates are always unique. Each type, field, argument, enum value, or
-directive may be referenced by exactly one possible Schema Coordinate.
-
-For example, the following is *not* a valid Schema Coordinate:
-
-```graphql counter-example
-Entity.Business
-```
-
-In this counter example, `Entity.Business` is redundant since `Business` already
-uniquely identifies the Business type. Such redundancy is disallowed by this
-spec - every type, field, field argument, enum value, directive, and directive
-argument has exactly one canonical Schema Coordinate.
