@@ -2091,7 +2091,7 @@ For example, `String` and `@deprecated(reason:)` are both valid schema
 coordinates which refer to built-in schema elements.
 
 Note: A {SchemaCoordinate} is not a definition within a GraphQL {Document}, but
-a separate stand-alone grammar, intended to be used by tools to reference types,
+a separate standalone grammar, intended to be used by tools to reference types,
 fields, and other *schema element*s. For example as references within
 documentation, or as lookup keys in usage frequency tracking.
 
