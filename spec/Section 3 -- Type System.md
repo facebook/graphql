@@ -2136,8 +2136,8 @@ SchemaCoordinate : @ Name ( Name : )
   1. Let {directiveName} be the value of the first {Name}.
   2. Let {directive} be the directive in the {schema} named {directiveName}.
   3. Assert {directive} must exist.
-  7. Let {argumentName} be the value of the second {Name}.
-  8. Return the argument of {directive} named {argumentName}.
+  4. Let {argumentName} be the value of the second {Name}.
+  5. Return the argument of {directive} named {argumentName}.
 
 **Examples**
 
