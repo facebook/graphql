@@ -2088,7 +2088,9 @@ by exactly one possible schema coordinate.
 
 A *schema coordinate* may refer to either a defined or built-in *schema element*.
 For example, `String` and `@deprecated(reason:)` are both valid schema
-coordinates which refer to built-in schema elements.
+coordinates which refer to built-in schema elements. However it must not refer
+to a meta-field. For example, `Business.__typename` is *not* a valid
+schema coordinate.
 
 Note: A {SchemaCoordinate} is not a definition within a GraphQL {Document}, but
 a separate standalone grammar, intended to be used by tools to reference types,
