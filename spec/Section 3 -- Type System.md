@@ -2081,7 +2081,7 @@ SchemaCoordinate :
 *schema element* within a GraphQL Schema.
 
 :: A *schema element* is a specific instance of a named type, type field,
-input field, enum value, argument, or directive.
+input field, enum value, field argument, directive, or directive argument.
 
 A *schema coordinate* is always unique. Each *schema element* may be referenced
 by exactly one possible schema coordinate.
