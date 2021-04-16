@@ -181,11 +181,23 @@ characters are permitted between the characters defining a {FloatValue}.
 
 ### Punctuators
 
-Punctuator :: one of ! $ & ( ) ... : = @ [ ] { | } . [lookahead != {`.`, Digit}]
+Punctuator ::
+  - DotPunctuator
+  - OtherPunctuator
+
+DotPunctuator :: `.` [lookahead != {`.`, Digit}]
+
+OtherPunctuator :: one of ! $ & ( ) ... : = @ [ ] { | }
 
 GraphQL documents include punctuation in order to describe structure. GraphQL
 is a data description language and not a programming language, therefore GraphQL
 lacks the punctuation often used to describe mathematical expressions.
+
+The {`.`} punctuator must not be followed by a {`.`} or {Digit}. This
+ensures that the source {"..."} can only be interpreted as a single {`...`} and
+not three {`.`}. It also avoids any potential ambiguity with {FloatValue}. As
+an example the source {".123"} has no valid lexical representation (without this
+restriction it would have been interpreted as {`.`} followed by {IntValue}).
 
 
 ### Names

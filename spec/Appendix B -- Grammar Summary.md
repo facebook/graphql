@@ -45,7 +45,13 @@ Token ::
   - FloatValue
   - StringValue
 
-Punctuator :: one of ! $ & ( ) ... : = @ [ ] { | } . [lookahead != {`.`, Digit}]
+Punctuator ::
+  - DotPunctuator
+  - OtherPunctuator
+
+DotPunctuator :: `.` [lookahead != {`.`, Digit}]
+
+OtherPunctuator :: one of ! $ & ( ) ... : = @ [ ] { | }
 
 Name ::
   - NameStart NameContinue* [lookahead != NameContinue]
