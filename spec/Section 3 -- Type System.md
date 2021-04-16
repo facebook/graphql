@@ -2176,5 +2176,5 @@ type Business {
   email: String @private(scope: "loggedIn")
 }
 
-directive @private(scope: String!) on FIELD
+directive @private(scope: String!) on FIELD_DEFINITION
 ```
