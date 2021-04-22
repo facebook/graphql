@@ -2080,8 +2080,8 @@ SchemaCoordinate :
 :: A *schema coordinate* is a human readable string that uniquely identifies a
 *schema element* within a GraphQL Schema.
 
-:: A *schema element* is a specific instance of a named type, type field,
-input field, enum value, field argument, directive, or directive argument.
+:: A *schema element* is a specific instance of a named type, field, input
+field, enum value, field argument, directive, or directive argument.
 
 A *schema coordinate* is always unique. Each *schema element* may be referenced
 by exactly one possible schema coordinate.
@@ -2127,8 +2127,8 @@ SchemaCoordinate : Name . Name ( Name : )
   4. Let {fieldName} be the value of the second {Name}.
   5. Let {field} be the field of {type} named {fieldName}.
   6. Assert {field} must exist.
-  7. Let {argumentName} be the value of the third {Name}.
-  8. Return the argument of {field} named {argumentName}.
+  7. Let {fieldArgumentName} be the value of the third {Name}.
+  8. Return the argument of {field} named {fieldArgumentName}.
 
 SchemaCoordinate : @ Name
   1. Let {directiveName} be the value of the first {Name}.
@@ -2138,15 +2138,15 @@ SchemaCoordinate : @ Name ( Name : )
   1. Let {directiveName} be the value of the first {Name}.
   2. Let {directive} be the directive in the {schema} named {directiveName}.
   3. Assert {directive} must exist.
-  4. Let {argumentName} be the value of the second {Name}.
-  5. Return the argument of {directive} named {argumentName}.
+  4. Let {directiveArgumentName} be the value of the second {Name}.
+  5. Return the argument of {directive} named {directiveArgumentName}.
 
 **Examples**
 
 | Element Kind       | *Schema Coordinate*              | *Schema Element*                                                        |
 | ------------------ | -------------------------------- | ----------------------------------------------------------------------- |
 | Named Type         | `Business`                       | `Business` type                                                         |
-| Type Field         | `Business.name`                  | `name` field on the `Business` type                                     |
+| Field              | `Business.name`                  | `name` field on the `Business` type                                     |
 | Input Field        | `SearchCriteria.filter`          | `filter` input field on the `SearchCriteria` input object type          |
 | Enum Value         | `SearchFilter.OPEN_NOW`          | `OPEN_NOW` value of the `SearchFilter` enum                             |
 | Field Argument     | `Query.searchBusiness(criteria:)`| `criteria` argument on the `searchBusiness` field on the `Query` type   |
