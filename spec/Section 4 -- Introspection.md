@@ -56,6 +56,7 @@ would produce the result:
 }
 ```
 
+
 ## Reserved Names
 
 Types and fields required by the GraphQL introspection system that are used in
@@ -103,6 +104,23 @@ in any defined type.
 
 Note: `__typename` may not be included as a root field in a subscription
 operation.
+
+## Ordering
+
+Servers must preserve lexical ordering between SDL and introspection.
+
+For the given SDL:
+
+```graphql
+type MyType {
+  field1(arg1: String, arg2: Int): Boolean
+  field2: Boolean
+}
+```
+
+The introspection result must produce an ordered array of fields `[field1, field2]` for `MyType`
+and an ordered array of arguments `[arg1, arg2]` for `MyType.field1`.
+
 
 ## Schema Introspection
 
@@ -415,6 +433,7 @@ Fields
   default value used by this input value in the condition a value is not
   provided at runtime. If this input value has no default value, returns {null}.
 
+
 ### The __EnumValue Type
 
 The `__EnumValue` type represents one of possible values of an enum.
@@ -426,6 +445,7 @@ Fields
 * `isDeprecated` returns {true} if this enum value should no longer be used,
   otherwise {false}.
 * `deprecationReason` optionally provides a reason why this enum value is deprecated.
+
 
 ### The __Directive Type
 
