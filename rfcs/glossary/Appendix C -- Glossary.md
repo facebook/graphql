@@ -5,9 +5,9 @@ used throughout this specification document.
 
 ## Glossary is Non-Normative
 
-Where a glossary definition and the usage within the specification do not
-align, this likely indicates a mistake in the glossary - the glossary is
-non-normative and the specification should be treated as the "source of truth."
+Where a glossary definition and the usage within the specification do not align,
+this likely indicates a mistake in the glossary - the glossary is non-normative
+and the specification should be treated as the "source of truth."
 
 ## Parenthesized Terms
 
@@ -83,9 +83,9 @@ The Object Type associated with a given operation type within the schema.
 
 Example:
 
-> A schema defines the initial root operation type for each kind of operation
-> it supports: {`query`}, {`mutation`}, and {`subscription`}; this determines
-> the place in the type system where those operations begin.
+> A schema defines the initial root operation type for each kind of operation it
+> supports: {`query`}, {`mutation`}, and {`subscription`}; this determines the
+> place in the type system where those operations begin.
 
 ### (GraphQL) document
 
@@ -95,8 +95,7 @@ extensions; defined by {Document}.
 
 Example:
 
-> Once a GraphQL document is written, it should always mean the same
-> thing.
+> Once a GraphQL document is written, it should always mean the same thing.
 
 ### Executable (GraphQL) document
 
@@ -118,8 +117,8 @@ Example:
 
 ### (GraphQL) variables
 
-**Definition**: placeholder for a value within an operation that may be
-supplied at runtime; defined via {VariableDefinitions}.
+**Definition**: placeholder for a value within an operation that may be supplied
+at runtime; defined via {VariableDefinitions}.
 
 Example:
 

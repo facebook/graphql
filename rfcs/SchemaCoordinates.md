@@ -28,10 +28,11 @@ specification or name for this convention.
    requested**. This may be implemented by incrementing a counter by the name of
    the schema coordinate for each field executed in a request.
 
-   _Existing implementations: Yelp (internal), Facebook (internal),
-   [Shopify (API health report)][shopify-api-health]_
+   _Existing implementations: Yelp (internal), Facebook (internal), [Shopify
+   (API health report)][shopify-api-health]_
 
-   [shopify-api-health]: https://shopify.dev/concepts/about-apis/versioning/api-health
+   [shopify-api-health]:
+     https://shopify.dev/concepts/about-apis/versioning/api-health
 
 1. GraphiQL and other playgrounds / documentation sites want to show a list of
    **search results** when a user searches for a type or field name. We can
@@ -41,9 +42,9 @@ specification or name for this convention.
 
    _Existing implementations: GraphiQL, Apollo Studio (see "Prior Art")_
 
-1. A developer may want to perform **analytics** on all known
-   [persisted queries][apq] - e.g. what are the most commonly used fields across
-   all documents. Schema coordinates may be used as the index/lookup keys when
+1. A developer may want to perform **analytics** on all known [persisted
+   queries][apq] - e.g. what are the most commonly used fields across all
+   documents. Schema coordinates may be used as the index/lookup keys when
    storing this information in the database.
 
    _Existing implementations: Yelp (internal)_
@@ -51,8 +52,8 @@ specification or name for this convention.
    [apq]: https://www.apollographql.com/docs/apollo-server/performance/apq/
 
 1. A **GitHub bot** may want to warn developers in a Pull Request comment
-   whenever the schema diff contains a breaking change. Schema coordinates can be
-   used to provide a list of which fields were broken.
+   whenever the schema diff contains a breaking change. Schema coordinates can
+   be used to provide a list of which fields were broken.
 
    _Existing implementations: GraphQL Inspector (see "Prior Art")_
 
@@ -99,11 +100,11 @@ introspection call).
 
 Refers to a named attribute on the named type.
 
-Not all types support this. For object types and interface types this is a field,
-for input objects this would be an input field, for enums this would be an enum
-value, for future GraphQL types this will relate to a related concept if they
-have one (e.g. for the [proposed "tagged" type][tagged-type] it would refer to
-the "member field").
+Not all types support this. For object types and interface types this is a
+field, for input objects this would be an input field, for enums this would be
+an enum value, for future GraphQL types this will relate to a related concept if
+they have one (e.g. for the [proposed "tagged" type][tagged-type] it would refer
+to the "member field").
 
 [tagged-type]: https://github.com/graphql/graphql-spec/pull/733
 
@@ -146,8 +147,7 @@ We can write the following schema coordinates:
 - `Person` uniquely identifies the the "Person" type
 - `Business` uniquely identifies the the "Business" type
 - `Person.name` uniquely identifies the "name" field on the "Person" type
-- `Business.name` uniquely identifies the "name" field on the "Business"
-  type
+- `Business.name` uniquely identifies the "name" field on the "Business" type
 - `Business.owner` uniquely identifies the "owner" field on the "Business" type
 - `Query.searchBusinesses` uniquely identifies the "searchBusinesses" field on
   the "Query" type
@@ -159,9 +159,10 @@ We can write the following schema coordinates:
 
 ## 🎨 Prior art
 
-- The name "schema coordinates" is inspired from [GraphQL Java](https://github.com/graphql-java/graphql-java)
-  (4.3k stars), where "field coordinates" are already used in a similar way as
-  described in this RFC.
+- The name "schema coordinates" is inspired from
+  [GraphQL Java](https://github.com/graphql-java/graphql-java) (4.3k stars),
+  where "field coordinates" are already used in a similar way as described in
+  this RFC.
 
   - [GitHub comment](https://github.com/graphql/graphql-spec/issues/735#issuecomment-646979049)
   - [Implementation](https://github.com/graphql-java/graphql-java/blob/2acb557474ca73/src/main/java/graphql/schema/FieldCoordinates.java)
@@ -223,8 +224,8 @@ From the query above, we may calculate the following list of schema coordinates:
 - `Person.name`
 
 `Query.searchBusinesses(name:)` is also a valid member of the output set. The
-serialization algorithm may optionally choose to output all permutations of field
-arguments used, should this be specified.
+serialization algorithm may optionally choose to output all permutations of
+field arguments used, should this be specified.
 
 A library has been written to demonstrate this mapping:
 <https://github.com/sharkcore/extract-schema-coordinates>.
@@ -305,9 +306,9 @@ field. The following have also been proposed:
 - `Foo~bar`
 - `Foo:bar`
 
-"`.`" is already used in the existing implementations of field coordinates, hence
-the suggested usage in this RFC. However, we may wish to consider one of the
-alternatives above, should this conflict with existing or planned language
+"`.`" is already used in the existing implementations of field coordinates,
+hence the suggested usage in this RFC. However, we may wish to consider one of
+the alternatives above, should this conflict with existing or planned language
 features.
 
 ### Field Arguments
@@ -334,10 +335,12 @@ for this syntax are:
 #### Pros for `Query.rollDice.numDice`
 
 - Less bytes/characters to type
-- May allow for extension to include nested "field paths" (e.g. Foo.bar.Baz.qux...)
+- May allow for extension to include nested "field paths" (e.g.
+  Foo.bar.Baz.qux...)
 - [Prior usage][graphiql-usage] of this syntax to represent state internally
 
-[graphiql-usage]: https://github.com/graphql/graphql-spec/pull/746#issuecomment-752941039
+[graphiql-usage]:
+  https://github.com/graphql/graphql-spec/pull/746#issuecomment-752941039
 
 #### Pros for `Query.rollDice(numDice:)`
 
@@ -384,7 +387,8 @@ paths.)
 > schema coordinates spec, for sure, but is still a potential use-case for the
 > syntax).
 >
-> ~ [benjie](https://github.com/graphql/graphql-spec/pull/746#discussion_r527639917)
+> ~
+> [benjie](https://github.com/graphql/graphql-spec/pull/746#discussion_r527639917)
 
 ## 🙅 Syntax Non-goals
 
@@ -396,12 +400,12 @@ This syntax consciously does not cover the following use cases:
   pass "wildcards" or "star syntax" to be able to select multiple schema
   elements. This implies multiple ways of _selecting_ a schema node.
 
-  For example, `User.address` and `User.a*` might both resolve to `User.address`.
-  But `User.a*` could also ambiguously refer to `User.age`.
+  For example, `User.address` and `User.a*` might both resolve to
+  `User.address`. But `User.a*` could also ambiguously refer to `User.age`.
 
   It's unclear how wildcard expansion would work with respect to field
-  arguments\*, potentially violating the requirement of this schema to _uniquely_
-  identify schema components.
+  arguments\*, potentially violating the requirement of this schema to
+  _uniquely_ identify schema components.
 
   \* _(e.g. does `Query.getUser` also select all arguments on the `getUser`
   field? Who knows! A discussion for another time.)_
@@ -432,12 +436,13 @@ This syntax consciously does not cover the following use cases:
   - `Query.userById.name`
   - `User.bestFriend.bestFriend.bestFriend.name`
 
-  This violates a non-goal that there be one, unambiguous way to write a
-  schema coordinate to refer to a schema member. Both examples can be
-  "simplified" to `User.name`, which _is_ a valid schema coordinate.
+  This violates a non-goal that there be one, unambiguous way to write a schema
+  coordinate to refer to a schema member. Both examples can be "simplified" to
+  `User.name`, which _is_ a valid schema coordinate.
 
-  Should a use case for this arise in the future, a follow up RFC may investigate
-  how schema coordinates could work with "field paths" (e.g. `["query", "searchBusinesses", 1, "owner", "name"]`) to cover this.
+  Should a use case for this arise in the future, a follow up RFC may
+  investigate how schema coordinates could work with "field paths" (e.g.
+  `["query", "searchBusinesses", 1, "owner", "name"]`) to cover this.
 
 - **Directive applications**
 
@@ -457,18 +462,20 @@ This syntax consciously does not cover the following use cases:
   ```
 
   You _can_ select the definition of the `private` directive and its arguments
-  (with `@private` and `@private(scope:)` respectively), but you cannot select the
-  application of the `@private` on `User.email`.
+  (with `@private` and `@private(scope:)` respectively), but you cannot select
+  the application of the `@private` on `User.email`.
 
   For the stated use cases of this RFC, it is more likely that consumers want to
   select and track usage and changes to the definition of the custom directive
   instead.
 
   If we _did_ want to support this, a syntax such as `User.email@private[0]`
-  could work. (The indexing is necessary since [multiple applications of the same
-  directive is allowed][multiple-directives], and each is considered unique.)
+  could work. (The indexing is necessary since [multiple applications of the
+  same directive is allowed][multiple-directives], and each is considered
+  unique.)
 
-  [multiple-directives]: http://spec.graphql.org/draft/#sec-Directives-Are-Unique-Per-Location
+  [multiple-directives]:
+    http://spec.graphql.org/draft/#sec-Directives-Are-Unique-Per-Location
 
 - **Union members**
 
@@ -492,14 +499,15 @@ This syntax consciously does not cover the following use cases:
   members on `Meal` (e.g. `Meal.Breakfast` or `Meal.Lunch`).
 
   It is unclear what the use case for this would be, so we won't (yet?) support
-  this. In such cases, consumers may select type members directly (e.g. `Lunch`).
+  this. In such cases, consumers may select type members directly (e.g.
+  `Lunch`).
 
 ## Answered questions
 
-- **Would we want to add a method to graphql-js?** A `fieldCoordinateToFieldNode`
-  method (for example) may take in a field coordinate string and return a field
-  AST node to serve as a helper / reference implementation of the algorithm to
-  look up the field node.
+- **Would we want to add a method to graphql-js?** A
+  `fieldCoordinateToFieldNode` method (for example) may take in a field
+  coordinate string and return a field AST node to serve as a helper / reference
+  implementation of the algorithm to look up the field node.
 
   _Update:_ [This was discussed in the August Working Group Meeting][meeting] -
   it was suggested to keep any utilities as third party libraries to avoid edge

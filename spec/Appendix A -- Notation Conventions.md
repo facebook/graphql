@@ -4,9 +4,8 @@ This specification document contains a number of notation conventions used to
 describe technical concepts such as language grammar and semantics as well as
 runtime algorithms.
 
-This appendix seeks to explain these notations in greater detail to
-avoid ambiguity.
-
+This appendix seeks to explain these notations in greater detail to avoid
+ambiguity.
 
 ## Context-Free Grammar
 
@@ -35,16 +34,17 @@ NonTerminalWithSingleDefinition : NonTerminal `terminal`
 While using the following notation for a production with a list of definitions:
 
 NonTerminalWithManyDefinitions :
-  - OtherNonTerminal `terminal`
-  - `terminal`
 
-A definition may refer to itself, which describes repetitive sequences,
-for example:
+- OtherNonTerminal `terminal`
+- `terminal`
+
+A definition may refer to itself, which describes repetitive sequences, for
+example:
 
 ListOfLetterA :
-  - ListOfLetterA `a`
-  - `a`
 
+- ListOfLetterA `a`
+- `a`
 
 ## Lexical and Syntactical Grammar
 
@@ -55,11 +55,11 @@ characters first produces a sequence of lexical tokens according to the lexical
 grammar which then produces abstract syntax tree (AST) according to the
 syntactical grammar.
 
-A lexical grammar production describes non-terminal "tokens" by
-patterns of terminal Unicode characters. No "whitespace" or other ignored
-characters may appear between any terminal Unicode characters in the lexical
-grammar production. A lexical grammar production is distinguished by a two colon
-`::` definition.
+A lexical grammar production describes non-terminal "tokens" by patterns of
+terminal Unicode characters. No "whitespace" or other ignored characters may
+appear between any terminal Unicode characters in the lexical grammar
+production. A lexical grammar production is distinguished by a two colon `::`
+definition.
 
 Word :: Letter+
 
@@ -70,14 +70,12 @@ a one colon `:` definition.
 
 Sentence : Word+ `.`
 
-
 ## Grammar Notation
 
 This specification uses some additional notation to describe common patterns,
 such as optional or repeated patterns, or parameterized alterations of the
 definition of a non-terminal. This section explains these short-hand notations
 and their expanded definitions in the context-free grammar.
-
 
 **Constraints**
 
@@ -90,13 +88,12 @@ that the same sequence of characters could not replace {SevenCarlinWords}.
 
 SafeWord : Word but not SevenCarlinWords
 
-A grammar may also list a number of restrictions after "but not" separated
-by "or".
+A grammar may also list a number of restrictions after "but not" separated by
+"or".
 
 For example:
 
 NonBooleanName : Name but not `true` or `false`
-
 
 **Lookahead Restrictions**
 
@@ -108,7 +105,6 @@ The following example makes it clear that {Letter+} must be greedy, since {Word}
 cannot be followed by yet another {Letter}.
 
 Word :: Letter+ [lookahead != Letter]
-
 
 **Optionality and Lists**
 
@@ -122,8 +118,9 @@ Sentence : Noun Verb Adverb?
 is shorthand for
 
 Sentence :
-  - Noun Verb Adverb
-  - Noun Verb
+
+- Noun Verb Adverb
+- Noun Verb
 
 A subscript suffix "{Symbol+}" is shorthand for a list of one or more of that
 symbol, represented as an additional recursive production.
@@ -137,43 +134,45 @@ is shorthand for
 Book : Cover Page_list Cover
 
 Page_list :
-  - Page_list Page
-  - Page
 
+- Page_list Page
+- Page
 
 **Parameterized Grammar Productions**
 
-A symbol definition subscript suffix parameter in braces "{Symbol[Param]}"
-is shorthand for two symbol definitions, one appended with that parameter name,
-the other without. The same subscript suffix on a symbol is shorthand for that
-variant of the definition. If the parameter starts with "?", that
-form of the symbol is used if in a symbol definition with the same parameter.
-Some possible sequences can be included or excluded conditionally when
-respectively prefixed with "\[+Param]" and "\[~Param]".
+A symbol definition subscript suffix parameter in braces "{Symbol[Param]}" is
+shorthand for two symbol definitions, one appended with that parameter name, the
+other without. The same subscript suffix on a symbol is shorthand for that
+variant of the definition. If the parameter starts with "?", that form of the
+symbol is used if in a symbol definition with the same parameter. Some possible
+sequences can be included or excluded conditionally when respectively prefixed
+with "\[+Param]" and "\[~Param]".
 
 As an example:
 
 Example[Param] :
-  - A
-  - B[Param]
-  - C[?Param]
-  - [+Param] D
-  - [~Param] E
+
+- A
+- B[Param]
+- C[?Param]
+- [+Param] D
+- [~Param] E
 
 is shorthand for
 
 Example :
-  - A
-  - B_param
-  - C
-  - E
+
+- A
+- B_param
+- C
+- E
 
 Example_param :
-  - A
-  - B_param
-  - C_param
-  - D
 
+- A
+- B_param
+- C_param
+- D
 
 ## Grammar Semantics
 
@@ -184,13 +183,12 @@ For example, this describes how a parser should interpret a string literal:
 
 StringValue :: `""`
 
-  * Return an empty Unicode character sequence.
+- Return an empty Unicode character sequence.
 
 StringValue :: `"` StringCharacter+ `"`
 
-  * Return the Unicode character sequence of all {StringCharacter}
-    Unicode character values.
-
+- Return the Unicode character sequence of all {StringCharacter} Unicode
+  character values.
 
 ## Algorithms
 
@@ -198,21 +196,23 @@ This specification describes some algorithms used by the static and runtime
 semantics, they're defined in the form of a function-like syntax with the
 algorithm's name and the arguments it accepts along with a list of algorithmic
 steps to take in the order listed. Each step may establish references to other
-values, check various conditions, call other algorithms, and eventually return
-a value representing the outcome of the algorithm for the provided arguments.
+values, check various conditions, call other algorithms, and eventually return a
+value representing the outcome of the algorithm for the provided arguments.
 
 For example, the following example describes an algorithm named {Fibonacci}
 which accepts a single argument {number}. The algorithm's steps produce the next
 number in the Fibonacci sequence:
 
 Fibonacci(number):
-  * If {number} is {0}:
-    * Return {1}.
-  * If {number} is {1}:
-    * Return {2}.
-  * Let {previousNumber} be {number} - {1}.
-  * Let {previousPreviousNumber} be {number} - {2}.
-  * Return {Fibonacci(previousNumber)} + {Fibonacci(previousPreviousNumber)}.
 
-Note: Algorithms described in this document are written to be easy to understand.
-Implementers are encouraged to include equivalent but optimized implementations.
+- If {number} is {0}:
+  - Return {1}.
+- If {number} is {1}:
+  - Return {2}.
+- Let {previousNumber} be {number} - {1}.
+- Let {previousPreviousNumber} be {number} - {2}.
+- Return {Fibonacci(previousNumber)} + {Fibonacci(previousPreviousNumber)}.
+
+Note: Algorithms described in this document are written to be easy to
+understand. Implementers are encouraged to include equivalent but optimized
+implementations.
