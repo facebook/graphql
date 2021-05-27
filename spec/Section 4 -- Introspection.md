@@ -72,10 +72,11 @@ GraphQL supports type name introspection within any selection set in an
 operation, with the single exception of selections at the root of a subscription
 operation. Type name introspection is accomplished via the meta-field
 `__typename: String!` on any Object, Interface, or Union. It returns the name of
-the concrete Object type at that point during execution.
+the *concrete Object type* at that point during execution.
 
-This is most often used when querying against Interface or Union types to
-identify which actual Object type of the possible types has been returned.
+This is most often used when querying against a Interface or Union
+*abstract type* to identify which actual *concrete Object type* of the possible
+types has been returned.
 
 As a meta-field, `__typename` is implicit and does not appear in the fields list
 in any defined type.
@@ -230,7 +231,7 @@ Fields\:
   Otherwise {null}.
 * `subscriptionType` is the root type of a subscription operation, if supported.
   Otherwise {null}.
-* `types` must return the set of all named types contained within this schema.
+* `types` must return the set of all *named type* contained within this schema.
   Any named type which can be found through a field of any introspection type
   must be included in this set.
 * `directives` must return the set of all directives available within
@@ -240,12 +241,8 @@ Fields\:
 ### The __Type Type
 
 `__Type` is at the core of the type introspection system, it represents all
-types in the system: both named types (e.g. Scalars and Object types) and
-type modifiers (e.g. List and Non-Null types).
-
-Type modifiers are used to modify the type presented in the field `ofType`.
-This modified type may recursively be a modified type, representing lists,
-non-nullables, and combinations thereof, ultimately modifying a named type.
+types in the system: both *named types* (e.g. *Scalar type* or *Object type*)
+and *wrapped types* (e.g. *List type* or *Non-Null type*).
 
 There are several different kinds of type. In each kind, different fields are
 actually valid. All possible kinds are listed in the `__TypeKind` enum.
@@ -264,10 +261,11 @@ possible value of the `__TypeKind` enum:
 
 **Scalar**
 
-Represents scalar types such as Int, String, and Boolean. Scalars cannot have fields.
+Represents a *scalar type* such as Int, String, and Boolean. Scalars cannot have
+fields.
 
-Also represents [Custom scalars](#sec-Scalars.Custom-Scalars) which may provide
-`specifiedByURL` as a *scalar specification URL*.
+Also represents a *custom scalar type* which may provide `specifiedByURL` as a
+*scalar specification URL*.
 
 Fields\:
 
@@ -281,8 +279,9 @@ Fields\:
 
 **Object**
 
-Object types represent concrete instantiations of sets of fields. The
-introspection types (e.g. `__Type`, `__Field`, etc) are examples of objects.
+An *Object type* represents concrete instantiations of sets of fields. The
+introspection types (e.g. `__Type`, `__Field`, etc) are themselves examples of
+object types.
 
 Fields\:
 
@@ -297,28 +296,12 @@ Fields\:
 * All other fields must return {null}.
 
 
-**Union**
-
-Unions are an abstract type where no common fields are declared. The possible
-types of a union are explicitly listed out in `possibleTypes`. Types can be
-made parts of unions without modification of that type.
-
-Fields\:
-
-* `kind` must return `__TypeKind.UNION`.
-* `name` must return a String.
-* `description` may return a String or {null}.
-* `possibleTypes` returns the list of types that can be represented within this
-  union. They must be object types.
-* All other fields must return {null}.
-
-
 **Interface**
 
-Interfaces are an abstract type where there are common fields declared. Any type
-that implements an interface must define all the fields with names and types
-exactly matching. The implementations of this interface are explicitly listed
-out in `possibleTypes`.
+An *Interface type* is an *abstract type* where there are common fields
+declared. Any type that implements an interface must define all the fields with
+names and types exactly matching. The implementations of this interface are
+explicitly listed out in `possibleTypes`.
 
 Fields\:
 
@@ -331,13 +314,30 @@ Fields\:
 * `interfaces` must return the set of interfaces that an object implements
   (if none, `interfaces` must return the empty set).
 * `possibleTypes` returns the list of types that implement this interface.
-  They must be object types.
+  They must each be an *Object type*.
+* All other fields must return {null}.
+
+
+**Union**
+
+A *Union type* is an *abstract type* where no common fields are declared. The
+possible types of a union are explicitly listed out in `possibleTypes`. The
+possible types of a union do not directly reference the union type.
+
+Fields\:
+
+* `kind` must return `__TypeKind.UNION`.
+* `name` must return a String.
+* `description` may return a String or {null}.
+* `possibleTypes` returns the list of types that can be represented within this
+  union. They must each be an *Object type*.
 * All other fields must return {null}.
 
 
 **Enum**
 
-Enums are special scalars that can only have a defined set of values.
+An *Enum type* is a *leaf type* that represents a defined set of possible
+values.
 
 Fields\:
 
@@ -353,11 +353,11 @@ Fields\:
 
 **Input Object**
 
-Input objects are composite types defined as a list of named input values. They
-are only used as inputs to arguments and variables and cannot be a field
-return type.
+An *Input Object type* is a composite *input type* defined as a set of
+*input type* fields. They are only used as inputs to arguments and variables and
+cannot be a field return type.
 
-For example the input object `Point` could be defined as:
+For example the Input Object `Point` could be defined as:
 
 ```graphql example
 input Point {
@@ -377,12 +377,12 @@ Fields\:
 
 **List**
 
-Lists represent sequences of values in GraphQL. A List type is a type modifier:
-it wraps another type instance in the `ofType` field, which defines the type of
+A *List type* is a *wrapped type* which represents an ordered collection of
+values. It wraps an *item type* in the `ofType` field which defines the type of
 each item in the list.
 
-The modified type in the `ofType` field may itself be a modified type, allowing
-the representation of Lists of Lists, or Lists of Non-Nulls.
+A List type's *item type* in the `ofType` field may itself be a *wrapped type*,
+allowing the representation of Lists of Lists, or Lists of Non-Nulls.
 
 Fields\:
 
@@ -393,15 +393,13 @@ Fields\:
 
 **Non-Null**
 
-GraphQL types are nullable. The value {null} is a valid response for field type.
+A *Non-Null type* is a *wrapped type* which represents a value which must not be
+{null}. It wraps a *nullable type* in the `ofType` field which defines the
+expected type of a value if not {null}.
 
-A Non-Null type is a type modifier: it wraps another type instance in the
-`ofType` field. Non-null types do not allow {null} as a response, and indicate
-required inputs for arguments and input object fields.
-
-The modified type in the `ofType` field may itself be a modified List type,
-allowing the representation of Non-Null of Lists. However it must not be a
-modified Non-Null type to avoid a redundant Non-Null of Non-Null.
+A Non-Null type's *nullable type* in the `ofType` field may be a *List type*,
+allowing the representation of Non-Null of Lists. However it must not be another
+*Non-Null type* to avoid a redundant Non-Null of Non-Null.
 
 Fields\:
 
@@ -430,7 +428,7 @@ Fields\:
 ### The __InputValue Type
 
 The `__InputValue` type represents field and directive arguments as well as the
-`inputFields` of an input object.
+`inputFields` of an *Input Object type*.
 
 Fields\:
 

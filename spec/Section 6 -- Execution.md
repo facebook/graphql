@@ -91,7 +91,7 @@ CoerceVariableValues(schema, operation, variableValues):
     * If {hasValue} is not {true} and {defaultValue} exists (including {null}):
       * Add an entry to {coercedValues} named {variableName} with the
         value {defaultValue}.
-    * Otherwise if {variableType} is a Non-Nullable type, and either {hasValue}
+    * Otherwise if {variableType} is a *Non-Null type*, and either {hasValue}
       is not {true} or {value} is {null}, raise a request error.
     * Otherwise if {hasValue} is true:
       * If {value} is {null}:
@@ -561,7 +561,7 @@ ExecuteField(objectType, objectValue, fieldType, fields, variableValues):
 
 Fields may include arguments which are provided to the underlying runtime in
 order to correctly produce a value. These arguments are defined by the field in
-the type system to have a specific input type.
+the type system to have a specific *input type*.
 
 At each argument position in an operation may be a literal {Value}, or a
 {Variable} to be provided at runtime.
@@ -590,7 +590,7 @@ CoerceArgumentValues(objectType, field, variableValues):
     * If {hasValue} is not {true} and {defaultValue} exists (including {null}):
       * Add an entry to {coercedValues} named {argumentName} with the
         value {defaultValue}.
-    * Otherwise if {argumentType} is a Non-Nullable type, and either {hasValue}
+    * Otherwise if {argumentType} is a *Non-Null type*, and either {hasValue}
       is not {true} or {value} is {null}, raise a field error.
     * Otherwise if {hasValue} is true:
       * If {value} is {null}:
@@ -642,26 +642,26 @@ to the expected return type. If the return type is another Object type, then
 the field execution process continues recursively.
 
 CompleteValue(fieldType, fields, result, variableValues):
-  * If the {fieldType} is a Non-Null type:
-    * Let {innerType} be the inner type of {fieldType}.
+  * If the {fieldType} is a *Non-Null type*:
+    * Let {nullableType} be the *nullable type* of {fieldType}.
     * Let {completedResult} be the result of calling
-      {CompleteValue(innerType, fields, result, variableValues)}.
+      {CompleteValue(nullableType, fields, result, variableValues)}.
     * If {completedResult} is {null}, raise a field error.
     * Return {completedResult}.
   * If {result} is {null} (or another internal value similar to {null} such as
     {undefined}), return {null}.
-  * If {fieldType} is a List type:
+  * If {fieldType} is a *List type*:
     * If {result} is not a collection of values, raise a field error.
-    * Let {innerType} be the inner type of {fieldType}.
+    * Let {itemType} be the *item type* of {fieldType}.
     * Return a list where each list item is the result of calling
-      {CompleteValue(innerType, fields, resultItem, variableValues)}, where
+      {CompleteValue(itemType, fields, resultItem, variableValues)}, where
       {resultItem} is each item in {result}.
-  * If {fieldType} is a Scalar or Enum type:
+  * If {fieldType} is a *leaf type* (a *Scalar type* or *Enum type*):
     * Return the result of {CoerceResult(fieldType, result)}.
-  * If {fieldType} is an Object, Interface, or Union type:
-    * If {fieldType} is an Object type.
+  * If {fieldType} is a *composite type* (an *Object type*, *Interface type*, or *Union type*):
+    * If {fieldType} is an *Object type*.
       * Let {objectType} be {fieldType}.
-    * Otherwise if {fieldType} is an Interface or Union type.
+    * Otherwise if {fieldType} is an *abstract type* (an *Interface type* or *Union type*):
       * Let {objectType} be {ResolveAbstractType(fieldType, result)}.
     * Let {subSelectionSet} be the result of calling {MergeSelectionSets(fields)}.
     * Return the result of evaluating {ExecuteSelectionSet(subSelectionSet, objectType, result, variableValues)} *normally* (allowing for parallelization).
@@ -674,7 +674,7 @@ schema. This "dynamic type checking" allows GraphQL to provide consistent
 guarantees about returned types atop any service's internal runtime.
 
 See the Scalars [Result Coercion and Serialization](#sec-Scalars.Result-Coercion-and-Serialization)
-sub-section for more detailed information about how GraphQL's built-in scalars
+sub-section for more detailed information about how GraphQL's *built-in scalars*
 coerce result values.
 
 CoerceResult(leafType, value):
@@ -690,10 +690,9 @@ and output of {CoerceResult()} must not be {null}.
 
 **Resolving Abstract Types**
 
-When completing a field with an abstract return type, that is an Interface or
-Union return type, first the abstract type must be resolved to a relevant Object
-type. This determination is made by the internal system using whatever
-means appropriate.
+When completing a value of an *abstract type* (an Interface or Union type),
+first the abstract type must be resolved to a *concrete Object type*. This
+determination is made by the internal system using whatever means appropriate.
 
 Note: A common method of determining the Object type for an {objectValue} in
 object-oriented environments, such as Java or C#, is to use the class name of
@@ -701,8 +700,8 @@ the {objectValue}.
 
 ResolveAbstractType(abstractType, objectValue):
   * Return the result of calling the internal method provided by the type
-    system for determining the Object type of {abstractType} given the
-    value {objectValue}.
+    system for determining the *concrete Object type* of {abstractType} given
+    the value {objectValue}.
 
 **Merging Selection Sets**
 
@@ -752,24 +751,24 @@ the response.
 
 If the result of resolving a field is {null} (either because the function to
 resolve the field returned {null} or because a field error was raised), and that
-field is of a `Non-Null` type, then a field error is raised. The
-error must be added to the {"errors"} list in the response.
+field is of a *Non-Null type*, then a field error is raised. The error must be
+added to the {"errors"} list in the response.
 
 If the field returns {null} because of a field error which has already been
 added to the {"errors"} list in the response, the {"errors"} list must not be
 further affected. That is, only one error should be added to the errors list per
 field.
 
-Since `Non-Null` type fields cannot be {null}, field errors are propagated to be
+Since *Non-Null type* fields cannot be {null}, field errors are propagated to be
 handled by the parent field. If the parent field may be {null} then it resolves
-to {null}, otherwise if it is a `Non-Null` type, the field error is further
+to {null}, otherwise if it is a *Non-Null type*, the field error is further
 propagated to it's parent field.
 
-If a `List` type wraps a `Non-Null` type, and one of the elements of that list
+If a *List type* wraps a *Non-Null type*, and one of the elements of that list
 resolves to {null}, then the entire list must resolve to {null}.
-If the `List` type is also wrapped in a `Non-Null`, the field error continues
-to propagate upwards.
+If the *List type* is also wrapped by a *Non-Null type*, the field error
+continues to propagate upwards.
 
 If all fields from the root of the request to the source of the field error
-return `Non-Null` types, then the {"data"} entry in the response should
+return a *Non-Null type*, then the {"data"} entry in the response should
 be {null}.

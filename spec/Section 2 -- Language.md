@@ -620,7 +620,7 @@ object).
 
 Fragments can be specified on object types, interfaces, and unions.
 
-Selections within fragments only return values when the concrete type of the object
+Selections within fragments only return values when the *concrete Object type*
 it is operating on matches the type of the fragment.
 
 For example in this operation using the Facebook data model:
@@ -1154,9 +1154,8 @@ NonNullType :
   - NamedType !
   - ListType !
 
-GraphQL describes the types of data expected by arguments and variables.
-Input types may be lists of another input type, or a non-null variant of any
-other input type.
+GraphQL describes the *input type* of data expected by arguments and variables,
+and the *output type* of fields.
 
 **Semantics**
 
@@ -1170,13 +1169,14 @@ Type : Name
 Type : [ Type ]
 
   * Let {itemType} be the result of evaluating {Type}
-  * Let {type} be a List type where {itemType} is the contained type.
+  * Let {type} be a *List type* wrapping {itemType} as its *item type*.
   * Return {type}
 
 Type : Type !
 
   * Let {nullableType} be the result of evaluating {Type}
-  * Let {type} be a Non-Null type where {nullableType} is the contained type.
+  * Let {type} be a *Non-Null type* wrapping {nullableType} as its
+    *nullable type*.
   * Return {type}
 
 
@@ -1194,7 +1194,7 @@ behavior in ways field arguments will not suffice, such as conditionally
 including or skipping a field. Directives provide this by describing additional information to the executor.
 
 Directives have a name along with a list of arguments which may accept values
-of any input type.
+of any *input type*.
 
 Directives can be used to describe additional information for types, fields,
 fragments and operations.

@@ -263,74 +263,115 @@ TypeDefinition :
   - InputObjectTypeDefinition
 
 The fundamental unit of any GraphQL Schema is the type. There are six kinds
-of named type definitions in GraphQL, and two wrapping types.
+of *named type* and two kinds of *wrapped type* definitions in GraphQL.
 
-The most basic type is a `Scalar`. A scalar represents a primitive value, like
-a string or an integer. Oftentimes, the possible responses for a scalar field
-are enumerable. GraphQL offers an `Enum` type in those cases, where the type
-specifies the space of valid responses.
-
-Scalars and Enums form the leaves in response trees; the intermediate levels are
-`Object` types, which define a set of fields, where each field is another
-type in the system, allowing the definition of arbitrary type hierarchies.
-
-GraphQL supports two abstract types: interfaces and unions.
-
-An `Interface` defines a list of fields; `Object` types and other Interface
-types which implement this Interface are guaranteed to implement those fields.
-Whenever a field claims it will return an Interface type, it will return a
-valid implementing Object type during execution.
-
-A `Union` defines a list of possible types; similar to interfaces, whenever the
-type system claims a union will be returned, one of the possible types will be
-returned.
-
-Finally, oftentimes it is useful to provide complex structs as inputs to
-GraphQL field arguments or variables; the `Input Object` type allows the schema
-to define exactly what data is expected.
+:: A *named type* is one of the six types defined with a name: *Scalar type*,
+*Enum type*, *Object type*, *Interface type*, *Union type*,
+and *Input Object type*.
 
 
-### Wrapping Types
+### Leaf and Composite Types
+
+The *named type* definitions are divided into leaf types and composite types,
+which together can compose to represent complex type hierarchies.
+
+:: A *leaf type* is found at the leaves in a response tree. There are two kinds
+of leaf types: *Scalar type* and *Enum type*.
+
+The most common *leaf type* is the *Scalar type*. GraphQL defines a set of
+*built-in scalars* for representing common primitive values and also allows a
+service to additionally provide a *custom scalar type* to represent any value.
+
+Oftentimes, the possible values for a *leaf type* are enumerable. GraphQL offers
+the *Enum type* in those cases, where each enum type definition specifies a set
+of possible values.
+
+:: A *composite type* composes other types together as a set of named fields,
+allowing the composition of arbitrary type hierarchies and nested trees of data.
+There are three composite *output type*: Object, Interface, and Union, and one
+composite *input type*: Input Object.
+
+The *Object type* is the concrete output *composite type* which describes an
+actual concrete value which a field will resolve to during execution, composed
+of other *output type* fields, allowing responses of nested data.
+
+Oftentimes it is useful to provide a *composite type* as an *input type* to a
+field argument or variable; the *Input Object type* composes a set of
+*input type* fields, allowing inputs of nested data.
+
+
+### Abstract Types
+
+Object fields describe the type they resolve to, however a field may not always
+know the exact resolved type until execution. A field can declare that it will
+resolve to one of a set of possible types by using an abstract type.
+
+:: An *abstract type* defines a set of possible types, one of which will be
+resolved during field execution. There are two kinds of abstract types:
+*Interface type* and *Union type*.
+
+:: The type an abstract type resolves to during execution is referred to as the
+*concrete Object type*, which is always an *Object type*.
+
+An *Interface type* defines a list of fields. Any type which implements an
+interface must implement those fields. Whenever a field claims it will
+return an *Interface type*, it will return an implementing
+*concrete Object type* during field execution.
+
+A *Union type* defines a list of possible types. Similar to Interfaces,
+whenever a field claims it will return a *Union type*, it will return one of the
+possible types as the *concrete Object type* during field execution.
+
+
+### Wrapped Types
 
 All of the types so far are assumed to be both nullable and singular: e.g. a
-scalar string returns either null or a singular string.
+scalar string returns either {null} or a singular string.
 
-A GraphQL schema may describe that a field represents a list of another type;
-the `List` type is provided for this reason, and wraps another type.
+:: A *wrapped type* wraps another type (its *inner type*) to create a collection
+or variation of that type. There are two kinds of wrapped types: *List type* and
+*Non-Null type*.
 
-Similarly, the `Non-Null` type wraps another type, and denotes that the
-resulting value will never be {null} (and that a field error cannot result in a
-{null} value).
+:: The *inner type* is the type immediately wrapped by a *wrapped type*, which
+itself may be a *wrapped type* allowing for combinations of *wrapped type*. If
+continuously unwrapped, ultimately a *named type* is found.
 
-These two types are referred to as "wrapping types"; non-wrapping types are
-referred to as "named types". A wrapping type has an underlying named type,
-found by continually unwrapping the type until a named type is found.
+A GraphQL schema may describe that a field or argument expects a list of another
+type; the *List type* is provided for this purpose, which has an *item type* as
+its *inner type*, describing the items in the list.
+
+Similarly, a field or argument may describe that it must never be {null}. The
+*Non-Null type* is provided for this purpose, which has a *nullable type* as
+its *inner type* describing the expected type, if not {null}.
 
 
 ### Input and Output Types
 
 Types are used throughout GraphQL to describe both the values accepted as input
 to arguments and variables as well as the values output by fields. These two
-uses categorize types as *input types* and *output types*. Some kinds of types,
-like Scalar and Enum types, can be used as both input types and output types;
-other kinds of types can only be used in one or the other. Input Object types can
-only be used as input types. Object, Interface, and Union types can only be used
-as output types. Lists and Non-Null types may be used as input types or output
-types depending on how the wrapped type may be used.
+uses categorize types as an *input type* or an *output type*. Some kinds of
+types, like Scalar and Enum types, can be used as both input types and output
+types; other kinds of types can only be used in one or the other.
+
+:: An *input type* is a *Scalar type*, *Enum type*, *Input Object type*, or a
+*wrapped type* of one of these types.
 
 IsInputType(type) :
-  * If {type} is a List type or Non-Null type:
-    * Let {unwrappedType} be the unwrapped type of {type}.
-    * Return IsInputType({unwrappedType})
+  * If {type} is a *wrapped type* (a *List type* or *Non-Null type*):
+    * Let {innerType} be the *inner type* of {type}.
+    * Return IsInputType({innerType})
   * If {type} is a Scalar, Enum, or Input Object type:
     * Return {true}
   * Return {false}
 
+:: An *output type* is a *Scalar type*, *Enum type*, *Object type*,
+*Interface Type*, *Union Type* or a *wrapped type* of one of these types.
+
 IsOutputType(type) :
-  * If {type} is a List type or Non-Null type:
-    * Let {unwrappedType} be the unwrapped type of {type}.
-    * Return IsOutputType({unwrappedType})
-  * If {type} is a Scalar, Object, Interface, Union, or Enum type:
+  * If {type} is a *wrapped type* (a *List type* or *Non-Null type*):
+    * Let {innerType} be the *inner type* of {type}.
+    * Return IsOutputType({innerType})
+  * If {type} is a Scalar, Enum, Object, Interface, or Union type:
     * Return {true}
   * Return {false}
 
@@ -354,35 +395,37 @@ represent additional fields a GraphQL client only accesses locally.
 
 ScalarTypeDefinition : Description? scalar Name Directives[Const]?
 
-Scalar types represent primitive leaf values in a GraphQL type system. GraphQL
-responses take the form of a hierarchical tree; the leaves of this tree are
-typically GraphQL Scalar types (but may also be Enum types or {null} values).
+:: A *Scalar type* is a *leaf type* in a GraphQL type system, and represents
+(along with *Enum types*) the leaf values in a GraphQL response value or input
+value. A Scalar type typically represents a primitive value, like a string,
+boolean, or number.
 
-GraphQL provides a number of built-in scalars which are fully defined in the
-sections below, however type systems may also add additional custom scalars to
-introduce additional semantic meaning.
+GraphQL provides a number of *built-in scalars* representing common primitive
+values which are fully defined in the sections below, however type systems may
+also add any additional *custom scalar type* to introduce additional semantic
+meaning representing any value.
 
 **Built-in Scalars**
 
-GraphQL specifies a basic set of well-defined Scalar types: {Int}, {Float},
-{String}, {Boolean}, and {ID}. A GraphQL framework should support all of these
-types, and a GraphQL service which provides a type by these names must adhere to
-the behavior described for them in this document. As an example, a service must
-not include a type called {Int} and use it to represent 64-bit numbers,
-internationalization information, or anything other than what is defined in
-this document.
+:: GraphQL specifies a basic set of well-defined *built-in scalars*: {Int},
+{Float}, {String}, {Boolean}, and {ID}. A GraphQL framework should support all
+of these types, and a GraphQL service which provides a type by these names must
+adhere to the behavior described for them in this document. As an example, a
+service must not include a type called {Int} and use it to represent 64-bit
+numbers, internationalization information, or anything other than what is
+defined in this document.
 
 When returning the set of types from the `__Schema` introspection type, all
-referenced built-in scalars must be included. If a built-in scalar type is not
+referenced *built-in scalars* must be included. If a built-in scalar type is not
 referenced anywhere in a schema (there is no field, argument, or input field of
 that type) then it must not be included.
 
 When representing a GraphQL schema using the type system definition language,
-all built-in scalars must be omitted for brevity.
+all *built-in scalars* must be omitted for brevity.
 
 **Custom Scalars**
 
-GraphQL services may use custom scalar types in addition to the built-in
+:: GraphQL services may use a *custom scalar type* in addition to the built-in
 scalars. For example, a GraphQL service could define a scalar called `UUID`
 which, while serialized as a string, conforms to [RFC 4122](https://tools.ietf.org/html/rfc4122).
 When querying a field of type `UUID`, you can then rely on the ability to parse
@@ -487,7 +530,7 @@ greater than or equal to 2<sup>31</sup>, a field error should be raised.
 
 **Input Coercion**
 
-When expected as an input type, only integer input values are accepted. All
+When expected as an *input type*, only integer input values are accepted. All
 other input values, including strings with numeric content, must raise a request
 error indicating an incorrect type. If the integer input value represents a
 value less than -2<sup>31</sup> or greater than or equal to 2<sup>31</sup>, a
@@ -520,7 +563,7 @@ coerced to {Float} and must raise a field error.
 
 **Input Coercion**
 
-When expected as an input type, both integer and float input values are
+When expected as an *input type*, both integer and float input values are
 accepted. Integer input values are coerced to Float by adding an empty
 fractional part, for example `1.0` for the integer input value `1`. All
 other input values, including strings with numeric content, must raise a request
@@ -549,7 +592,7 @@ string `"1"` for the integer `1`.
 
 **Input Coercion**
 
-When expected as an input type, only valid Unicode string input values are
+When expected as an *input type*, only valid Unicode string input values are
 accepted. All other input values must raise a request error indicating an
 incorrect type.
 
@@ -570,7 +613,7 @@ this may include returning `true` for non-zero numbers.
 
 **Input Coercion**
 
-When expected as an input type, only boolean input values are accepted. All
+When expected as an *input type*, only boolean input values are accepted. All
 other input values must raise a request error indicating an incorrect type.
 
 
@@ -593,7 +636,7 @@ When coercion is not possible they must raise a field error.
 
 **Input Coercion**
 
-When expected as an input type, any string (such as `"4"`) or integer (such as
+When expected as an *input type*, any string (such as `"4"`) or integer (such as
 `4` or `-4`) input value should be coerced to ID as appropriate for the ID
 formats a given GraphQL service expects. Any other input value, including float
 input values (such as `4.0`), must raise a request error indicating an incorrect
@@ -636,10 +679,10 @@ GraphQL operations are hierarchical and composed, describing a tree of
 information. While Scalar types describe the leaf values of these hierarchical
 operations, Objects describe the intermediate levels.
 
-GraphQL Objects represent a list of named fields, each of which yield a value of
-a specific type. Object values should be serialized as ordered maps, where the
-selected field names (or aliases) are the keys and the result of evaluating
-the field is the value, ordered by the order in which they appear in
+:: An *Object type* represents a list of named fields, each of which yield a
+value of a specific type. Object values should be serialized as ordered maps,
+where the selected field names (or aliases) are the keys and the result of
+evaluating the field is the value, ordered by the order in which they appear in
 the selection set.
 
 All fields defined within an Object type must not have a name which begins with
@@ -704,9 +747,7 @@ Must only yield exactly that subset:
 }
 ```
 
-A field of an Object type may be a Scalar, Enum, another Object type,
-an Interface, or a Union. Additionally, it may be any wrapping type whose
-underlying base type is one of those five.
+A field of an Object type must be an *output type*.
 
 For example, the `Person` type might include a `relationship`:
 
@@ -906,24 +947,23 @@ IsValidImplementation(type, implementedType):
             must be {true}.
 
 IsValidImplementationFieldType(fieldType, implementedFieldType):
-  1. If {fieldType} is a Non-Null type:
-     1. Let {nullableType} be the unwrapped nullable type of {fieldType}.
-     2. Let {implementedNullableType} be the unwrapped nullable type
-        of {implementedFieldType} if it is a Non-Null type, otherwise let it be
-        {implementedFieldType} directly.
+  1. If {fieldType} is a *Non-Null type*:
+     1. Let {nullableType} be the *nullable type* of {fieldType}.
+     2. Let {implementedNullableType} be the *nullable type*
+        of {implementedFieldType} if it is a *Non-Null type*, otherwise let it
+        be {implementedFieldType} directly.
      3. Return {IsValidImplementationFieldType(nullableType, implementedNullableType)}.
-  2. If {fieldType} is a List type and {implementedFieldType} is also a List type:
-     1. Let {itemType} be the unwrapped item type of {fieldType}.
-     2. Let {implementedItemType} be the unwrapped item type
-        of {implementedFieldType}.
+  2. If {fieldType} is and {implementedFieldType} are both a *List type*:
+     1. Let {itemType} be the *item type* of {fieldType}.
+     2. Let {implementedItemType} be the *item type* of {implementedFieldType}.
      3. Return {IsValidImplementationFieldType(itemType, implementedItemType)}.
   3. If {fieldType} is the same type as {implementedFieldType} then return {true}.
-  4. If {fieldType} is an Object type and {implementedFieldType} is
-     a Union type and {fieldType} is a possible type of {implementedFieldType}
+  4. If {fieldType} is an *Object type* and {implementedFieldType} is
+     a *Union type* and {fieldType} is a possible type of {implementedFieldType}
      then return {true}.
-  5. If {fieldType} is an Object or Interface type and {implementedFieldType}
-     is an Interface type and {fieldType} declares it implements
-     {implementedFieldType} then return {true}.
+  5. If {fieldType} is an *Object type* or *Interface type* and
+     {implementedFieldType} is an *Interface type* and {fieldType} declares it
+     implements {implementedFieldType} then return {true}.
   6. Otherwise return {false}.
 
 
@@ -935,8 +975,8 @@ InputValueDefinition : Description? Name : Type DefaultValue? Directives[Const]?
 
 Object fields are conceptually functions which yield values. Occasionally object
 fields can accept arguments to further specify the return value. Object field
-arguments are defined as a list of all possible argument names and their
-expected input types.
+arguments are defined as a list of all possible argument names and each of their
+expected *input type*.
 
 All arguments defined within a field must not have a name which begins with
 {"__"} (two underscores), as this is used exclusively by GraphQL's
@@ -973,8 +1013,7 @@ May return the result:
 }
 ```
 
-The type of an object field argument must be an input type (any type except an
-Object, Interface, or Union type).
+The type of an object field argument must be an *input type*.
 
 
 ### Field Deprecation
@@ -1045,13 +1084,12 @@ InterfaceTypeDefinition :
   - Description? interface Name ImplementsInterfaces? Directives[Const]? FieldsDefinition
   - Description? interface Name ImplementsInterfaces? Directives[Const]? [lookahead != `{`]
 
-GraphQL interfaces represent a list of named fields and their arguments. GraphQL
-objects and interfaces can then implement these interfaces which requires that
-the implementing type will define all fields defined by those interfaces.
+:: An *Interface type* represents a list of named fields and their arguments.
+An *object type* or another *interface type* can implement an interface which
+requires that it defines all fields defined by that interface.
 
 Fields on a GraphQL interface have the same rules as fields on a GraphQL object;
-their type can be Scalar, Object, Enum, Interface, or Union, or any wrapping
-type whose base type is one of those five.
+their type must be an *output type*.
 
 For example, an interface `NamedEntity` may describe a required field and types
 such as `Person` or `Business` may then implement this interface to guarantee
@@ -1294,8 +1332,8 @@ UnionMemberTypes :
   - UnionMemberTypes | NamedType
   - = `|`? NamedType
 
-GraphQL Unions represent an object that could be one of a list of GraphQL
-Object types, but provides for no guaranteed fields between those types.
+:: A *Union type* represents an value that could be one of a list of potential
+*Object type*, but provides for no guaranteed fields between those types.
 They also differ from interfaces in that Object types declare what interfaces
 they implement, but are not aware of what unions contain them.
 
@@ -1378,9 +1416,9 @@ Unions are never valid inputs.
 Union types have the potential to be invalid if incorrectly defined.
 
 1. A Union type must include one or more unique member types.
-2. The member types of a Union type must all be Object base types;
+2. The member types of a Union type must each be an *Object type*;
    Scalar, Interface and Union types must not be member types of a Union.
-   Similarly, wrapping types must not be member types of a Union.
+   Similarly, *wrapped types* must not be member types of a Union.
 
 
 ### Union Extensions
@@ -1399,9 +1437,9 @@ extension of another GraphQL service.
 Union type extensions have the potential to be invalid if incorrectly defined.
 
 1. The named type must already be defined and must be a Union type.
-2. The member types of a Union type extension must all be Object base types;
+2. The member types of a Union type extension must each be an *Object type*;
    Scalar, Interface and Union types must not be member types of a Union.
-   Similarly, wrapping types must not be member types of a Union.
+   Similarly, *wrapped types* must not be member types of a Union.
 3. All member types of a Union type extension must be unique.
 4. All member types of a Union type extension must not already be a member of
    the original Union type.
@@ -1418,8 +1456,9 @@ EnumValuesDefinition : { EnumValueDefinition+ }
 
 EnumValueDefinition : Description? EnumValue Directives[Const]?
 
-GraphQL Enum types, like Scalar types, also represent leaf values in a GraphQL
-type system. However Enum types describe the set of possible values.
+:: An *Enum type*, like a *Scalar type*, is a *leaf type* representing leaf
+values in a GraphQL response or input. However Enum types describe the set of
+possible values.
 
 Enums are not references for a numeric value, but are unique values in their own
 right. They may serialize as a string: the name of the represented value.
@@ -1492,9 +1531,9 @@ InputFieldsDefinition : { InputValueDefinition+ }
 Fields may accept arguments to configure their behavior. These inputs are often
 scalars or enums, but they sometimes need to represent more complex values.
 
-A GraphQL Input Object defines a set of input fields; the input fields are either
-scalars, enums, or other input objects. This allows arguments to accept
-arbitrarily complex structs.
+:: An *Input Object type* defines a set of input fields; the input fields are
+any *input type* (Scalars, Enums, or Input Objects). This allows arguments to
+accept arbitrarily complex data.
 
 In this example, an Input Object called `Point2D` describes `x` and `y` inputs:
 
@@ -1654,13 +1693,14 @@ InputObjectTypeExtension :
   - extend input Name Directives[Const]? InputFieldsDefinition
   - extend input Name Directives[Const] [lookahead != `{`]
 
-Input object type extensions are used to represent an input object type which
-has been extended from some original input object type. For example, this might
-be used by a GraphQL service which is itself an extension of another GraphQL service.
+Input Object type extensions are used to represent an *Input Object type* which
+has been extended from some original Input Object type. For example, this might
+be used by a GraphQL service which is itself an extension of another GraphQL
+service.
 
 **Type Validation**
 
-Input object type extensions have the potential to be invalid if incorrectly defined.
+Input Object type extensions have the potential to be invalid if incorrectly defined.
 
 1. The named type must already be defined and must be a Input Object type.
 2. All fields of an Input Object type extension must have unique names.
@@ -1672,13 +1712,17 @@ Input object type extensions have the potential to be invalid if incorrectly def
 
 ## List
 
-A GraphQL list is a special collection type which declares the type of each
-item in the List (referred to as the *item type* of the list). List values are
-serialized as ordered lists, where each item in the list is serialized as per
-the item type.
+:: By default, all types in GraphQL are singular. A *List type* is a
+*wrapped type* which defines an ordered collection of its *inner type*.
 
-To denote that a field uses a List type the item type is wrapped in square brackets
-like this: `pets: [Pet]`. Nesting lists is allowed: `matrix: [[Int]]`.
+:: Each instance of a List type wraps a *item type*, its *inner type*,
+describing the type of each item in the List. List values are serialized as
+ordered lists, where each item in the list is serialized as per the item type.
+An *item type* field may itself be a *wrapped type*, allowing the representation
+of Lists of Lists, or Lists of Non-Nulls.
+
+To denote that a type is a *List type* the *item type* is wrapped in square
+brackets like this: `pets: [Pet]`. Nesting lists is allowed: `matrix: [[Int]]`.
 
 **Result Coercion**
 
@@ -1729,13 +1773,18 @@ Expected Type | Provided Value   | Coerced Value
 
 ## Non-Null
 
-By default, all types in GraphQL are nullable; the {null} value is a valid
-response for all of the above types. To declare a type that disallows null,
-the GraphQL Non-Null type can be used. This type wraps an underlying type,
-and this type acts identically to that wrapped type, with the exception
-that {null} is not a valid response for the wrapping type. A trailing
-exclamation mark is used to denote a field that uses a Non-Null type like this:
-`name: String!`.
+:: By default, all types in GraphQL are nullable; the {null} value is a valid
+response for all of the above types. A *Non-Null type* is a *wrapped type* which
+defines a variation of its *inner type* which must not be {null}.
+
+:: Each instance of a Non-Null type has a *nullable type*, its *inner type*.
+The Non-Null type acts identically to its nullable type, with the exception that
+{null} is not a valid response. A *nullable type* field may be a *List type*,
+allowing the representation of Non-Null of Lists. However it must not be another
+*Non-Null type* to avoid a redundant Non-Null of Non-Null.
+
+To denote that a type is a *Non-Null type* the *nullable type* is followed by an
+exclamation mark like this: `required: String!`.
 
 **Nullable vs. Optional**
 
@@ -1751,7 +1800,7 @@ are always optional and non-null types are always required.
 **Result Coercion**
 
 In all of the above result coercions, {null} was considered a valid value.
-To coerce the result of a Non-Null type, the coercion of the wrapped type
+To coerce the result of a Non-Null type, the coercion of the *inner type*
 should be performed. If that result was not {null}, then the result of coercing
 the Non-Null type is that result. If that result was {null}, then a field error
 must be raised.
@@ -1769,7 +1818,7 @@ a request error must be raised.
 
 If the value provided to the Non-Null type is provided with a literal value
 other than {null}, or a Non-Null variable value, it is coerced using the input
-coercion for the wrapped type.
+coercion for the *inner type*.
 
 A non-null argument cannot be omitted:
 
@@ -1800,19 +1849,20 @@ a non-null input type as invalid.
 
 **Type Validation**
 
-1. A Non-Null type must not wrap another Non-Null type.
+1. A *Non-Null type* must not wrap another *Non-Null type*.
 
 
 ### Combining List and Non-Null
 
-The List and Non-Null wrapping types can compose, representing more complex
-types. The rules for result coercion and input coercion of Lists and Non-Null
+The *List type* and *Non-Null types* can compose, representing more complex
+types. The rules for result coercion and input coercion of List and Non-Null
 types apply in a recursive fashion.
 
-For example if the inner item type of a List is Non-Null (e.g. `[T!]`), then
-that List may not contain any {null} items. However if the inner type of a
-Non-Null is a List (e.g. `[T]!`), then {null} is not accepted however an empty
-list is accepted.
+For example if the *item type* of a *List type* is a *Non-Null type*
+(e.g. `[T!]`), then that List value may not contain any {null} items. However if
+the *nullable type* of a *Non-Null type* is a *List type* (e.g. `[T]!`), then
+{null} is not accepted as a value, however a List containing {null} as an item
+is accepted.
 
 Following are examples of result coercion with various types and values:
 
@@ -1886,7 +1936,7 @@ provide the `@deprecated` directive if representing deprecated portions of
 the schema.
 
 GraphQL implementations that support the type system definition language should
-provide the `@specifiedBy` directive if representing custom scalar
+provide the `@specifiedBy` directive if representing *custom scalar type*
 definitions.
 
 When representing a GraphQL schema using the type system definition language
@@ -2067,12 +2117,12 @@ directive @specifiedBy(url: String!) on SCALAR
 
 The `@specifiedBy` *built-in directive* is used within the type system
 definition language to provide a *scalar specification URL* for specifying the
-behavior of [custom scalar types](#sec-Scalars.Custom-Scalars). The URL should
-point to a human-readable specification of the data format, serialization, and
-coercion rules. It must not appear on built-in scalar types.
+behavior of a *custom scalar type*. The URL should point to a human-readable
+specification of the data format, serialization, and coercion rules. It must not
+appear on *built-in scalars*.
 
-In this example, a custom scalar type for `UUID` is defined with a URL pointing
-to the relevant IETF specification.
+In this example, a custom scalar `UUID` is defined by including a URL for the
+relevant IETF specification for UUID.
 
 ```graphql example
 scalar UUID @specifiedBy(url: "https://tools.ietf.org/html/rfc4122")
