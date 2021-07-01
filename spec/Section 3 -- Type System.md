@@ -877,6 +877,8 @@ of rules must be adhered to by every Object type in a GraphQL schema.
          characters {"__"} (two underscores).
       2. The argument must accept a type where {IsInputType(argumentType)}
          returns {true}.
+      3. If the argument has a default value it must be compatible with
+         {argumentType} as per the coercion rules for that type.
 3. An object type may declare that it implements one or more unique interfaces.
 4. An object type must be a super-set of all interfaces it implements:
    1. Let this object type be {objectType}.
@@ -1583,7 +1585,8 @@ defined by the input object type and for which a value exists. The resulting map
 is constructed with the following rules:
 
 * If no value is provided for a defined input object field and that field
-  definition provides a default value, the default value should be used. If no
+  definition provides a default value, the result of coercing the default value
+  according to the coercion rules of the input field type should be used. If no
   default value is provided and the input object field's type is non-null, an
   error should be raised. Otherwise, if the field is not required, then no entry
   is added to the coerced unordered map.
@@ -1643,10 +1646,53 @@ Literal Value            | Variables               | Coerced Value
       characters {"__"} (two underscores).
    3. The input field must accept a type where {IsInputType(inputFieldType)}
       returns {true}.
+   4. Let {fieldSet} be a set containing {inputField};
+      {DefaultValueContainsCycle(inputFieldType, defaultValue, fieldSet)} must
+      return {false}.
+   5. {defaultValue} must be compatible with {inputFieldType} as per the
+       coercion rules for that type.
 3. If an Input Object references itself either directly or through referenced
    Input Objects, at least one of the fields in the chain of references must be
    either a nullable or a List type.
 
+DefaultValueContainsCycle(type, defaultValue, visitedDefaultValueFields):
+
+- If {defaultValue} does not exist or is null, return {false}.
+- If {type} is a non-null type:
+  - Let {innerType} be the inner type of {type}.
+  - Return {DefaultValueContainsCycle(innerType, defaultValue, visitedDefaultValueFields)}.
+- If {type} is a list type:
+  - {defaultValue} must be a list. (TODO: should we coerce this to a list?)
+  - Let {innerType} be the inner type of {type}.
+  - For each {value} in {defaultValue}:
+    - If {DefaultValueContainsCycle(innerType, value, visitedDefaultValueFields)}:
+      - Return {true}.
+  - Return {false}.
+- If {type} is a scalar or enum type:
+  - Return {false}.
+- Assert: {type} is an input object type.
+- {defaultValue} must be an object.
+- For each field {field} in {type}:
+  - Let {fieldName} be the name of {field}.
+  - Let {fieldDefaultValue} be the value for attribute {fieldName} in {defaultValue}.
+  - If {fieldDefaultValue} does not exist:
+    - If {field} is within {visitedDefaultValueFields}:
+      - Return {true}.
+    - Add {field} to {visitedDefaultValueFields}.
+    - Let {fieldDefaultValue} be the default value for {field}.
+  - Let {fieldType} be the expected return type of {field}.
+  - If {DefaultValueContainsCycle(fieldType, fieldDefaultValue, visitedDefaultValueFields)}:
+    - Return {true}.
+- Return {false}.
+
+Note: in the above algorithm it's important that {visitedDefaultValueFields} is
+passed by value, not by reference, since each path needs its own independent
+stack.
+
+Note: the above algorithm works by determining if the default value on a
+particular input object field is referenced more than once in a particular
+chain. If it returns {true} (indicating a cycle was found) the object at fault
+might not be this object specifically, but one of the objects it references.
 
 ### Input Object Extensions
 
