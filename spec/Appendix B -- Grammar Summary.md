@@ -45,7 +45,13 @@ Token ::
   - FloatValue
   - StringValue
 
-Punctuator :: one of ! $ & ( ) ... : = @ [ ] { | }
+Punctuator ::
+  - DotPunctuator
+  - OtherPunctuator
+
+DotPunctuator :: `.` [lookahead != {`.`, Digit}]
+
+OtherPunctuator :: one of ! $ & ( ) ... : = @ [ ] { | }
 
 Name ::
   - NameStart NameContinue* [lookahead != NameContinue]
@@ -352,3 +358,10 @@ TypeSystemDirectiveLocation : one of
   - `ENUM_VALUE`
   - `INPUT_OBJECT`
   - `INPUT_FIELD_DEFINITION`
+
+SchemaCoordinate :
+  - Name
+  - Name . Name
+  - Name . Name ( Name : )
+  - @ Name
+  - @ Name ( Name : )
