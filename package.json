@@ -14,9 +14,9 @@
   },
   "scripts": {
     "test": "npm run test:build && npm run test:spellcheck",
-    "test:build": "spec-md spec/GraphQL.md > /dev/null",
+    "test:build": "spec-md --metadata spec/metadata.json spec/GraphQL.md > /dev/null",
     "test:spellcheck": "cspell 'spec/**/*.md' README.md",
-    "build": "mkdir -p out; spec-md --githubSource 'https://github.com/graphql/graphql-spec/blame/main/' spec/GraphQL.md > out/index.html",
+    "build": "mkdir -p out; spec-md --metadata spec/metadata.json --githubSource 'https://github.com/graphql/graphql-spec/blame/main/' spec/GraphQL.md > out/index.html",
     "watch": "nodemon -e json,md --exec 'npm run build'"
   },
   "devDependencies": {

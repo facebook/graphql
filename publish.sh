@@ -8,9 +8,9 @@ GITTAG=$(git tag --points-at HEAD)
 echo "Building spec"
 mkdir -p out
 if [ -n "$GITTAG" ]; then
-  spec-md --githubSource "https://github.com/graphql/graphql-spec/blame/$GITTAG/" spec/GraphQL.md > out/index.html
+  spec-md --metadata spec/metadata.json --githubSource "https://github.com/graphql/graphql-spec/blame/$GITTAG/" spec/GraphQL.md > out/index.html
 else
-  spec-md --githubSource "https://github.com/graphql/graphql-spec/blame/main/" spec/GraphQL.md > out/index.html
+  spec-md --metadata spec/metadata.json --githubSource "https://github.com/graphql/graphql-spec/blame/main/" spec/GraphQL.md > out/index.html
 fi
 npm run build > /dev/null 2>&1
 
