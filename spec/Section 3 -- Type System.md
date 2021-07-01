@@ -873,9 +873,11 @@ of rules must be adhered to by every Object type in a GraphQL schema.
       characters {"__"} (two underscores).
    3. The field must return a type where {IsOutputType(fieldType)} returns {true}.
    4. For each argument of the field:
-      1. The argument must not have a name which begins with the
+      1. The argument must have a unique name within that field;
+         no two arguments may share the same name.
+      2. The argument must not have a name which begins with the
          characters {"__"} (two underscores).
-      2. The argument must accept a type where {IsInputType(argumentType)}
+      3. The argument must accept a type where {IsInputType(argumentType)}
          returns {true}.
 3. An object type may declare that it implements one or more unique interfaces.
 4. An object type must be a super-set of all interfaces it implements:
@@ -1217,9 +1219,11 @@ Interface types have the potential to be invalid if incorrectly defined.
    3. The field must return a type where {IsOutputType(fieldType)}
       returns {true}.
    4. For each argument of the field:
-      1. The argument must not have a name which begins with the
+      1. The argument must have a unique name within that field;
+         no two arguments may share the same name.
+      2. The argument must not have a name which begins with the
          characters {"__"} (two underscores).
-      2. The argument must accept a type where {IsInputType(argumentType)}
+      3. The argument must accept a type where {IsInputType(argumentType)}
          returns {true}.
 3. An interface type may declare that it implements one or more unique
    interfaces, but may not implement itself.
@@ -1981,9 +1985,11 @@ repeatable directives.
 3. The directive must not have a name which begins with the characters
    {"__"} (two underscores).
 4. For each argument of the directive:
-   1. The argument must not have a name which begins with the
+   1. The argument must have a unique name within that directive;
+      no two arguments may share the same name.
+   2. The argument must not have a name which begins with the
       characters {"__"} (two underscores).
-   2. The argument must accept a type where {IsInputType(argumentType)}
+   3. The argument must accept a type where {IsInputType(argumentType)}
       returns {true}.
 
 ### @skip
