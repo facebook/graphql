@@ -51,7 +51,7 @@ of objects it can return, described in a GraphQL type system and returned
 in the GraphQL Schema.
 
 For our Star Wars example, the
-[starWarsSchema.js](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsSchema.js)
+[starWarsSchema.ts](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsSchema.ts)
 file in GraphQL.js defines this type system.
 
 The most basic type in the system will be `Human`, representing characters
@@ -72,7 +72,7 @@ This shorthand is convenient for describing the basic shape of a type
 system; the JavaScript implementation is more full-featured, and allows types
 and fields to be documented. It also sets up the mapping between the
 type system and the underlying data; for a test case in GraphQL.js, the
-underlying data is a [set of JavaScript objects](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsData.js),
+underlying data is a [set of JavaScript objects](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsData.ts),
 but in most cases the backing data will be accessed through some service, and
 this type system layer will be responsible for mapping from types and fields to
 that service.
@@ -247,11 +247,11 @@ GraphQL queries declaratively describe what data the issuer wishes
 to fetch from whoever is fulfilling the GraphQL query.
 
 For our Star Wars example, the
-[starWarsQueryTests.js](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsQuery-test.js)
+[starWarsQueryTests.js](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsQuery-test.ts)
 file in the GraphQL.js repository contains a number of queries and responses.
 That file is a test file that uses the schema discussed above and a set of
 sample data, located in
-[starWarsData.js](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsData.js).
+[starWarsData.js](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsData.ts).
 This test file can be run to exercise the reference implementation.
 
 An example query on the above schema would be:
@@ -606,7 +606,7 @@ developers when an invalid query has been created, without having to rely
 on runtime checks.
 
 For our Star Wars example, the file
-[starWarsValidationTests.js](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsValidation-test.js)
+[starWarsValidationTests.js](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsValidation-test.ts)
 contains a number of demonstrations of invalid operations, and is a test
 file that can be run to exercise the reference implementation's validator.
 
@@ -744,7 +744,7 @@ queries it supports. GraphQL allows us to do so using the introspection
 system!
 
 For our Star Wars example, the file
-[starWarsIntrospectionTests.js](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsIntrospection-test.js)
+[starWarsIntrospectionTests.js](https://github.com/graphql/graphql-js/blob/main/src/__tests__/starWarsIntrospection-test.ts)
 contains a number of queries demonstrating the introspection system, and is a
 test file that can be run to exercise the reference implementation's
 introspection system.
@@ -1116,7 +1116,7 @@ and create documentation browsers, or rich IDE experiences.
 This has just scratched the surface of the introspection system; we can
 query for enum values, what interfaces a type implements, and more. We
 can even introspect on the introspection system itself. The specification goes
-into more detail about this topic in the "Introspection" section, and the [introspection](https://github.com/graphql/graphql-js/blob/main/src/type/introspection.js)
+into more detail about this topic in the "Introspection" section, and the [introspection](https://github.com/graphql/graphql-js/blob/main/src/type/introspection.ts)
 file in GraphQL.js
 contains code implementing a specification-compliant GraphQL query
 introspection system.
@@ -1132,7 +1132,7 @@ and how to format a GraphQL response, as well as the grammar for GraphQL.
 
 ### Contributing to this repo
 
-This repository is managed by EasyCLA. Project participants must sign the free ([GraphQL Specification Membership agreement](https://preview-spec-membership.graphql.org) before making a contribution. You only need to do this one time, and it can be signed by [individual contributors](http://individual-spec-membership.graphql.org/) or their [employers](http://corporate-spec-membership.graphql.org/).
+This repository is managed by EasyCLA. Project participants must sign the free ([GraphQL Specification Membership agreement](https://preview-spec-membership.graphql.org) before making a contribution. You only need to do this one time, and it can be signed by [individual contributors](https://individual-spec-membership.graphql.org/) or their [employers](https://corporate-spec-membership.graphql.org/).
 
 To initiate the signature process please open a PR against this repo. The EasyCLA bot will block the merge if we still need a membership agreement from you.
 
