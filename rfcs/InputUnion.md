@@ -438,6 +438,17 @@ When an invalid schema or invalid query are used, it should be obvious what went
 
 Criteria score: 🥉
 
+## 🎯 Q. No new polymorphic type construct should be introduced
+
+The lack of polymorphism on input is only a side-effect of having 2 different type systems for input and output, a somewhat confusing GraphQL specificity (all mainstream programming language and API protocol use the same types for input and output).
+Adding a new construct for polymorphism support on input 'smells' like increasing confusion, and would increase the gap between input and output type systems, rather than reduce it.
+
+| [1][solution-1] | [2][solution-2] | [3][solution-3] | [4][solution-4] | [5][solution-5] | [6][solution-6] | [7][solution-7]
+|----|----|----|----|----|----|----|
+| 🚫️ | 🚫️ | ✅ | 🚫️ | ✅ | ❔ | 🚫️ |
+
+Criteria score: 🥇
+
 # 🚧 Possible Solutions
 
 The community has imagined a variety of possible solutions, synthesized here.
@@ -522,6 +533,8 @@ type Mutation {
   * ✅ Adding or removing an input type to a union has no extraneous effects on schema design
 * [P. Error states and messages should be clear and helpful][criteria-p]
   * ✅
+* [Q. No new polymorphic type construct should be introduced][criteria-q]
+  * 🚫️ ``ìnputunion```is a new type construct
 
 ## 💡 2. Explicit configurable Discriminator field
 
@@ -636,6 +649,8 @@ inputunion AnimalInput @discriminator(field: "species") =
      * Reusing input types in multiple input unions can become unwieldy
 * [P. Error states and messages should be clear and helpful][criteria-p]
   * ✅
+* [Q. No new polymorphic type construct should be introduced][criteria-q]
+  * 🚫️ ``ìnputunion```is a new type construct
 
 ## 💡 3. Order based discrimination
 
@@ -727,6 +742,8 @@ type Mutation {
   * ❔ Not evaluated
 * [P. Error states and messages should be clear and helpful][criteria-p]
   * ⚠️ Order-based discrimination can lead to some subtle issues based on when one type is chosen over another.
+* [Q. No new polymorphic type construct should be introduced][criteria-q]
+  * ✅ No new construct
 
 ## 💡 4. Structural uniqueness
 
@@ -822,6 +839,8 @@ input DogInput {
   * 🚫 Input types with similar fields may not be able to be combined without breaking changes
 * [P. Error states and messages should be clear and helpful][criteria-p]
   * 🚫 Structural uniqueness checks are very complex and have many hard-to-describe failure states.
+* [Q. No new polymorphic type construct should be introduced][criteria-q]
+  * 🚫️ ``ìnputunion```is a new type construct
 
 ## 💡 5. One Of (Tagged Union)
 
@@ -903,6 +922,8 @@ type Mutation {
 * [O. Unconstrained combination of input types to unions][criteria-o]
   * ✅ Adding or removing input types to a tagged union requires no extraneous effort
 * [P. Error states and messages should be clear and helpful][criteria-p]
+  * ✅
+* [Q. No new polymorphic type construct should be introduced][criteria-q]
   * ✅
 
 ### Summary of spec changes
@@ -1026,6 +1047,8 @@ https://github.com/graphql/graphql-spec/pull/733
   * ✅ Adding or removing member fields to a tagged type requires no extraneous effort and has no non-local consequences
 * [P. Error states and messages should be clear and helpful][criteria-p]
   * ✅
+* [Q. No new polymorphic type construct should be introduced][criteria-q]
+  * 🚫️ ``tagged```is a new type construct
 
 ### Summary of spec changes
 
@@ -1063,6 +1086,7 @@ A quick glance at the evaluation results. Remember that passing or failing a spe
 | [N][criteria-n] 🥈 | ✅⚠️ | ✅⚠️ | ✅⚠️ | ✅⚠️ | ✅ | ? | ✅⚠️ |
 | [O][criteria-o] 🥈 | ✅️ | 🚫️ | ❔ | 🚫 | ✅ | ? | ✅ |
 | [P][criteria-p] 🥉 | ✅️ | ✅️ | ⚠️ | 🚫 | ✅ | ❔ | ✅ |
+| [Q][criteria-q] 🥉 | 🚫 | 🚫 | ✅️ | 🚫 | ✅ | ❔ | 🚫 |
 
 [criteria-a]: #-a-graphql-should-contain-a-polymorphic-input-type
 [criteria-b]: #-b-input-polymorphism-matches-output-polymorphism
@@ -1080,6 +1104,7 @@ A quick glance at the evaluation results. Remember that passing or failing a spe
 [criteria-n]: #-n-existing-code-generated-tooling-is-backwards-compatible-with-introspection-additions
 [criteria-o]: #-o-unconstrained-combination-of-input-types-to-unions
 [criteria-p]: #-p-error-states-and-messages-should-be-clear-and-helpful
+[criteria-q]: #-q-no-new-polymorphic-type-construct-should-be-introduced
 
 [solution-1]: #-1-explicit-__typename-discriminator-field
 [solution-2]: #-2-explicit-configurable-discriminator-field
@@ -1100,3 +1125,4 @@ proposed as an evolution of Solution 5, and is currently the leading solution.
 * ~~[1][solution-1]~~
 * ~~[2][solution-2]~~
 * ~~[3][solution-3] / [4][solution-4]~~
+
