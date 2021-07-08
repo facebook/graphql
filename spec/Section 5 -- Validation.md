@@ -249,18 +249,69 @@ query getName {
 
 **Formal Specification**
 
-* For each subscription operation definition {subscription} in the document
-* Let {subscriptionType} be the root Subscription type in {schema}.
-* Let {selectionSet} be the top level selection set on {subscription}.
-* Let {variableValues} be the empty set.
-* Let {groupedFieldSet} be the result of
-  {CollectFields(subscriptionType, selectionSet, variableValues)}.
-* {groupedFieldSet} must have exactly one entry, which must not be an
-  introspection field.
+* For each subscription operation definition {subscription} in the document:
+  * Let {subscriptionType} be the root Subscription type in {schema}.
+  * Let {selectionSet} be the top level selection set on {subscription}.
+  * Let {groupedFieldSet} be the result of
+    {CollectSubscriptionFields(subscriptionType, selectionSet)}.
+  * {groupedFieldSet} must have exactly one entry, which must not be an
+    introspection field.
+
+CollectSubscriptionFields(objectType, selectionSet, visitedFragments):
+
+  * If {visitedFragments} is not provided, initialize it to the empty set.
+  * Initialize {groupedFields} to an empty ordered map of lists.
+  * For each {selection} in {selectionSet}:
+    * {selection} must not provide the `@skip` directive.
+    * {selection} must not provide the `@include` directive.
+    * If {selection} is a {Field}:
+      * Let {responseKey} be the response key of {selection} (the alias if defined, otherwise the field name).
+      * Let {groupForResponseKey} be the list in {groupedFields} for
+        {responseKey}; if no such list exists, create it as an empty list.
+      * Append {selection} to the {groupForResponseKey}.
+    * If {selection} is a {FragmentSpread}:
+      * Let {fragmentSpreadName} be the name of {selection}.
+      * If {fragmentSpreadName} is in {visitedFragments}, continue with the
+        next {selection} in {selectionSet}.
+      * Add {fragmentSpreadName} to {visitedFragments}.
+      * Let {fragment} be the Fragment in the current Document whose name is
+        {fragmentSpreadName}.
+      * If no such {fragment} exists, continue with the next {selection} in
+        {selectionSet}.
+      * Let {fragmentType} be the type condition on {fragment}.
+      * If {DoesFragmentTypeApply(objectType, fragmentType)} is false, continue
+        with the next {selection} in {selectionSet}.
+      * Let {fragmentSelectionSet} be the top-level selection set of {fragment}.
+      * Let {fragmentGroupedFieldSet} be the result of calling
+        {CollectSubscriptionFields(objectType, fragmentSelectionSet, visitedFragments)}.
+      * For each {fragmentGroup} in {fragmentGroupedFieldSet}:
+        * Let {responseKey} be the response key shared by all fields in {fragmentGroup}.
+        * Let {groupForResponseKey} be the list in {groupedFields} for
+          {responseKey}; if no such list exists, create it as an empty list.
+        * Append all items in {fragmentGroup} to {groupForResponseKey}.
+    * If {selection} is an {InlineFragment}:
+      * Let {fragmentType} be the type condition on {selection}.
+      * If {fragmentType} is not {null} and {DoesFragmentTypeApply(objectType, fragmentType)} is false, continue
+        with the next {selection} in {selectionSet}.
+      * Let {fragmentSelectionSet} be the top-level selection set of {selection}.
+      * Let {fragmentGroupedFieldSet} be the result of calling {CollectSubscriptionFields(objectType, fragmentSelectionSet, visitedFragments)}.
+      * For each {fragmentGroup} in {fragmentGroupedFieldSet}:
+        * Let {responseKey} be the response key shared by all fields in {fragmentGroup}.
+        * Let {groupForResponseKey} be the list in {groupedFields} for
+          {responseKey}; if no such list exists, create it as an empty list.
+        * Append all items in {fragmentGroup} to {groupForResponseKey}.
+  * Return {groupedFields}.
+
+Note: This algorithm is very similar to {CollectFields()}, it differs in that
+it does not have access to runtime variables and thus the `@skip` and
+`@include` directives cannot be used.
 
 **Explanatory Text**
 
 Subscription operations must have exactly one root field.
+
+To enable us to determine this without access to runtime variables, we must
+forbid the `@skip` and `@include` directives in the root selection set.
 
 Valid examples:
 
@@ -309,6 +360,19 @@ fragment multipleSubscriptions on Subscription {
     sender
   }
   disallowedSecondRootField
+}
+```
+
+We do not allow the `@skip` and `@include` directives at the root of the
+subscription operation. The following example is also invalid:
+
+```graphql counter-example
+subscription requiredRuntimeValidation($bool: Boolean!) {
+  newMessage @include(if: $bool) {
+    body
+    sender
+  }
+  disallowedSecondRootField @skip(if: $bool)
 }
 ```
 
