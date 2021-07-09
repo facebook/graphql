@@ -236,7 +236,7 @@ defined by this specification.
 
 ## Document
 
-Document : Definition+
+Document : Directives[Const]? Definition+
 
 Definition :
   - ExecutableDefinition

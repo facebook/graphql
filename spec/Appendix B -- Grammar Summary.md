@@ -115,7 +115,7 @@ lines and uniform indentation with {BlockStringValue()}.
 
 ## Document Syntax
 
-Document : Definition+
+Document : Directives[Const]? Definition+
 
 Definition :
   - ExecutableDefinition
@@ -327,6 +327,7 @@ DirectiveLocations :
   - `|`? DirectiveLocation
 
 DirectiveLocation :
+  - `DOCUMENT`
   - ExecutableDirectiveLocation
   - TypeSystemDirectiveLocation
 
