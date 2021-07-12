@@ -308,9 +308,9 @@ mutation {
 **Query shorthand**
 
 If a document contains only one operation and that operation is a query which
-defines no variables and contains no directives then that operation may be
-represented in a short-hand form which omits the {`query`} keyword and operation
-name.
+defines no variables and has no directives applied to it then that operation
+may be represented in a short-hand form which omits the {`query`} keyword and
+operation name.
 
 For example, this unnamed query operation is written via query shorthand.
 
