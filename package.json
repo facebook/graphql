@@ -16,12 +16,19 @@
     "test": "npm run test:build && npm run test:spellcheck",
     "test:build": "spec-md spec/GraphQL.md > /dev/null",
     "test:spellcheck": "cspell 'spec/**/*.md' README.md",
+    "format": "prettier --write '**/*.{md,yml,yaml,json}'",
+    "format:check": "prettier --check '**/*.{md,yml,yaml,json}'",
     "build": "mkdir -p out; spec-md --githubSource 'https://github.com/graphql/graphql-spec/blame/main/' spec/GraphQL.md > out/index.html",
     "watch": "nodemon -e json,md --exec 'npm run build'"
   },
   "devDependencies": {
     "cspell": "5.3.12",
     "nodemon": "2.0.7",
+    "prettier": "^2.3.0",
     "spec-md": "3.0.2"
+  },
+  "prettier": {
+    "proseWrap": "always",
+    "trailingComma": "none"
   }
 }

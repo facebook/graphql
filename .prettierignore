@@ -1,0 +1,10 @@
+*.swp
+*~
+.*.haste_cache.*
+.DS_Store
+npm-debug.log
+/build
+/out
+/gh-pages
+/node_modules
+/package.json

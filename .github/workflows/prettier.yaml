@@ -1,12 +1,12 @@
-name: Test
+name: Prettier formatting
 on: [push, pull_request]
+
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  build:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: "16.x"
       - run: npm ci
-      - run: npm test
+      - run: npm run format:check
