@@ -241,10 +241,10 @@ Fields\:
 
 `__Type` is at the core of the type introspection system, it represents all
 types in the system: both named types (e.g. Scalars and Object types) and
-type modifiers (e.g. List and Non-Null types).
+wrapped types (e.g. List and Non-Null types).
 
-Type modifiers are used to modify the type presented in the field `ofType`.
-This modified type may recursively be a modified type, representing lists,
+Wrapped types modify the type presented in the field `ofType` (the "inner
+type").  The inner type may recursively be a wrapped type, representing lists,
 non-nullables, and combinations thereof, ultimately modifying a named type.
 
 There are several different kinds of type. In each kind, different fields are
@@ -377,11 +377,11 @@ Fields\:
 
 **List**
 
-Lists represent sequences of values in GraphQL. A List type is a type modifier:
+Lists represent sequences of values in GraphQL. A List type is a wrapped type:
 it wraps another type instance in the `ofType` field, which defines the type of
 each item in the list.
 
-The modified type in the `ofType` field may itself be a modified type, allowing
+The type presented in the `ofType` field may itself be a wrapped type, allowing
 the representation of Lists of Lists, or Lists of Non-Nulls.
 
 Fields\:
@@ -395,13 +395,13 @@ Fields\:
 
 GraphQL types are nullable. The value {null} is a valid response for field type.
 
-A Non-Null type is a type modifier: it wraps another type instance in the
+A Non-Null type is a wrapped type: it wraps another type instance in the
 `ofType` field. Non-null types do not allow {null} as a response, and indicate
 required inputs for arguments and input object fields.
 
-The modified type in the `ofType` field may itself be a modified List type,
+The type presented in the `ofType` field may itself be a List wrapped type,
 allowing the representation of Non-Null of Lists. However it must not be a
-modified Non-Null type to avoid a redundant Non-Null of Non-Null.
+Non-Null wrapped type to avoid a redundant Non-Null of Non-Null.
 
 Fields\:
 
