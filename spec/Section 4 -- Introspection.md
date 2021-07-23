@@ -83,6 +83,47 @@ in any defined type.
 Note: `__typename` may not be included as a root field in a subscription
 operation.
 
+## Fulfilled Selections
+
+GraphQL supports the ability to introspect into whether any given selection was included in a response.
+When a selection is included, all of that selection's fields will be explicitly set, except those not executed due to a directive such as `@include` or `@skip`. Selection introspection is accomplished via the meta-field `__fulfilled(label: String): Boolean!` on any Object, Interface, or Union. It always returns the value `true`: `__fulfilled` will be set if and only if the selection containing it is included in the response.
+
+For example:
+```graphql
+user {
+  ... @include(if: $foo) {
+    included: __fulfilled(label: "user.included")
+  }
+  ... @skip(if: $foo) {
+    skipped: __fulfilled(label: "user.skipped")
+  }
+}
+```
+The response will either be:
+```json
+{
+  "user": {
+    "included": true
+  }
+}
+```
+or
+```json
+{
+  "user": {
+    "skipped": true
+  }
+}
+```
+
+This meta-field is often used to clarify response interaction: as an example, the `__fulfilled` field can be used as a way to tell the consumer whether a specific fragment was included in the response.
+
+As a meta-field, `__fulfilled` is implicit and does not appear in the fields list
+in any defined type.
+
+Note: `__fulfilled` may not be included as a root field in a subscription
+operation.
+
 ## Schema Introspection
 
 The schema introspection system is accessible from the meta-fields `__schema`
